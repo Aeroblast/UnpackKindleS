@@ -1,0 +1,198 @@
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Xml;
+using System.Diagnostics;
+namespace UnpackKindleS
+{
+
+    class Util
+    {
+
+        public static byte[] SubArray(byte[] src, ulong start, ulong length)
+        {
+            byte[] r = new byte[length];
+            for (ulong i = 0; i < length; i++) { r[i] = src[start + i]; }
+            return r;
+        }
+        public static byte[] SubArray(byte[] src, int start, int length)
+        {
+            byte[] r = new byte[length];
+            for (int i = 0; i < length; i++) { r[i] = src[start + i]; }
+            return r;
+        }
+        public static string ToHexString(byte[] src, uint start, uint length)
+        {
+            //https://stackoverflow.com/a/14333437/48700
+            char[] c = new char[length * 2];
+            int b;
+            for (int i = 0; i < length; i++)
+            {
+                b = src[start + i] >> 4;
+                c[i * 2] = (char)(55 + b + (((b - 10) >> 31) & -7));
+                b = src[start + i] & 0xF;
+                c[i * 2 + 1] = (char)(55 + b + (((b - 10) >> 31) & -7));
+            }
+            return new string(c);
+        }
+        public static UInt64 GetUInt64(byte[] src, ulong start)
+        {
+            byte[] t = SubArray(src, start, 8);
+            Array.Reverse(t);
+            return BitConverter.ToUInt64(t);
+        }
+        //big edian handle:
+        public static UInt32 GetUInt32(byte[] src, ulong start)
+        {
+            byte[] t = SubArray(src, start, 4);
+            Array.Reverse(t);
+            return BitConverter.ToUInt32(t);
+        }
+        public static UInt16 GetUInt16(byte[] src, ulong start)
+        {
+            byte[] t = SubArray(src, start, 2);
+            Array.Reverse(t);
+            return BitConverter.ToUInt16(t);
+        }
+        public static byte GetUInt8(byte[] src, ulong start)
+        {
+            return src[start];
+        }
+        public static UInt32 i32(string a)
+        {
+            return
+            (((uint)a[0]) << 24)
+            + (((uint)a[1]) << 16)
+            + (((uint)a[2]) << 8)
+            + (((uint)a[3]));
+        }
+        public static UInt32 i32(byte[] a)
+        {
+            return
+            (((uint)a[0]) << 24)
+            + (((uint)a[1]) << 16)
+            + (((uint)a[2]) << 8)
+            + (((uint)a[3]));
+        }
+
+        public static string GuessImageType(byte[] data)
+        {
+            if (data.Length < 4) return null;
+            if (data[0] == 0xff && data[1] == 0xd8
+            // && data[data.Length - 2] == 0xff && data[data.Length - 1] == 0xd9//有的会在后面跟几个0字节
+            )
+                return ".jpg";
+            if (Encoding.ASCII.GetString(data, 0, 4) == "GIF8")
+                return ".gif";
+            if (Encoding.ASCII.GetString(data, 0, 4) == "\x89\x50\x4e\x47")
+                return ".png";
+
+            return null;
+        }
+
+        public static string GetOuterXML(string data, string tagname)
+        {
+            int start = data.IndexOf("<" + tagname); if (start < 0) return null;
+            int end = data.IndexOf("</" + tagname + ">") + 3 + tagname.Length;
+            return data.Substring(start, end - start);
+        }
+        public static string GetInnerXML(XmlElement e)
+        {
+            string r = "";
+            if (e.ChildNodes == null) return e.InnerXml;
+            foreach (XmlNode n in e.ChildNodes)
+            {
+
+                if (n.NodeType == XmlNodeType.Element)
+                {
+                    r += "    " + GetOuterXML((XmlElement)n).Replace("\n", "    \n") + "\n";
+                    continue;
+                }
+                if (n.NodeType == XmlNodeType.Text)
+                {
+                    r += n.OuterXml;
+                }
+            }
+            return r;
+        }
+        public static string GetOuterXML(XmlElement e)
+        {
+            string inner = GetInnerXML(e);
+            string attr = "";
+            if (e.Attributes != null)
+                foreach (XmlAttribute a in e.Attributes)
+                {
+                    attr += string.Format(" {0}=\"{1}\"", a.Name, a.Value);
+                }
+            if (inner == "")
+            {
+                return string.Format("<{0}{1} />", e.Name, attr);
+            }
+            return String.Format("<{0}{2}>{1}</{0}>", e.Name, inner, attr);
+        }
+
+
+        public static T GetStructBE<T>(byte[] data, int offset)
+        {
+            int size = Marshal.SizeOf(typeof(T));
+            Byte[] data_trimed = SubArray(data, offset, size);
+            Array.Reverse(data_trimed);
+            IntPtr structPtr = Marshal.AllocHGlobal(size);
+            Marshal.Copy(data_trimed, 0, structPtr, size);
+            T r = (T)Marshal.PtrToStructure(structPtr, typeof(T));
+            Marshal.FreeHGlobal(structPtr);
+            return r;
+        }
+
+        public static UInt64 DecodeBase32(string s)
+        {
+            UInt64 r = 0;
+            foreach (char c in s)
+            {
+                uint v;
+                if (char.IsDigit(c))
+                {
+                    v = (uint)c - (uint)'0';
+                }
+                else
+                {
+                    v = (uint)c - (uint)'A' + 10;
+                }
+                r = (r * 32) + v;
+
+            }
+            return r;
+        }
+        public static string Number(int number, int length = 4)
+        {
+            string r = number.ToString();
+            for (int j = length - r.Length; j > 0; j--) r = "0" + r;
+            return r;
+        }
+
+        public static void Packup(string outputfullpath)
+        {
+            Process p=new Process();
+            p.StartInfo.FileName="packup.bat";
+            p.StartInfo.Arguments="\""+outputfullpath+"\"";
+            p.Start();
+        }
+    }
+    public class Log
+    {
+        static string t = "";
+        public static void log(string s)
+        {
+            t += s + "\r\n";
+            Console.WriteLine(s);
+        }
+    }
+    [System.Serializable]
+    public class UnpackKindleSException : System.Exception
+    {
+        public UnpackKindleSException(string message) : base(message) { }
+        protected UnpackKindleSException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+}

@@ -1,0 +1,103 @@
+@charset "UTF-8";
+
+
+/* ファイル情報
+----------------------------------------------------------------
+【内容】
+CSS リセット
+
+【CSSファイルバージョン】
+ver.1.2.0
+
+【当ファイル更新時の電書協EPUB 3 制作ガイドバージョン】
+ver.1.1.1
+
+【細目】
+・css reset
+
+【更新履歴】
+2012/12/07 ver.1.2.0
+・ファイル更新時の電書協EPUB 3 制作ガイドバージョン表記を追加
+・「text-underline-position: below left;」の「below」部分を「under」に変更
+
+2012/10/29 ver.1.1b1
+・body に text-underline-position を指定
+  ※ページ内すべての overline を縦組み時に右線（傍線）、
+    underline を左線として設定
+
+2012/08/21 ver.1.0b1
+・公開版
+---------------------------------------------------------------- */
+
+
+/* css reset
+---------------------------------------------------------------- */
+body {
+  margin:         0;
+  padding:        0;
+  font-size:      100%;
+  vertical-align: baseline;
+  line-height:    1.75;
+  background:     transparent;
+
+  word-spacing:   normal;
+  letter-spacing: normal;
+  white-space:    normal;
+  word-wrap:      break-word;
+  text-align:     justify;
+
+  -webkit-text-align-last: left;
+  -epub-text-align-last:   left;
+
+  -webkit-line-break: normal;
+  -epub-line-break:   normal;
+
+  -webkit-word-break: normal;
+  -epub-word-break:   normal;
+
+  -webkit-hyphens: auto;
+  -epub-hyphens:   auto;
+
+  -webkit-text-underline-position: under left;
+  text-underline-position: under left;
+}
+div,p {
+  display: block;
+  width:   auto;
+  height:  auto;
+  margin:  0;
+  padding: 0;
+}
+body,div,p {
+  text-indent: 0;
+}
+body > p,
+div  > p {
+  text-indent: inherit;
+}
+h1,h2,h3,h4,h5,h6 {
+  display:     block;
+  margin:      0;
+  padding:     0;
+  font-size:   100%;
+  font-weight: inherit;
+  background:  transparent;
+}
+img {
+  width:          auto;
+  height:         auto;
+  margin:         0;
+  padding:        0;
+  border:         none;
+  vertical-align: baseline;
+  background:     transparent;
+}
+a {
+  font-style:      inherit;
+  font-weight:     inherit;
+  text-decoration: inherit;
+  color:           inherit;
+  background:      transparent;
+}
+
+

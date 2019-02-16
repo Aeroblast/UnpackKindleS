@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="NoOneCares" />
+    <meta name="dtb:depth" content="1" />
+    <meta name="dtb:totalPageCount" content="0" />
+    <meta name="dtb:maxPageNumber" content="0" />
+  </head>
+<docTitle>
+  <text>冴えない彼女の育てかた４</text>
+</docTitle>
+<navMap>
+<navPoint id="navPoint-1" playOrder="1">
+  <navLabel><text>目次</text></navLabel>
+ <content src="Text/part0006.xhtml" />
+</navPoint>
+<navPoint id="navPoint-2" playOrder="2">
+  <navLabel><text>プロローグ</text></navLabel>
+ <content src="Text/part0008.xhtml#toc-001" />
+</navPoint>
+<navPoint id="navPoint-3" playOrder="3">
+  <navLabel><text>第一章　ラブコメだったら一冊に一度はお風呂シーン入れましょうよ（編集）</text></navLabel>
+ <content src="Text/part0009.xhtml#toc-002" />
+</navPoint>
+<navPoint id="navPoint-4" playOrder="4">
+  <navLabel><text>第二章　そういえば、イトコ同士って結（ｒｙ</text></navLabel>
+ <content src="Text/part0012.xhtml#toc-003" />
+</navPoint>
+<navPoint id="navPoint-5" playOrder="5">
+  <navLabel><text>第三章　いいか？　先読みするなよ？　ちゃんとラストで驚けよ？</text></navLabel>
+ <content src="Text/part0017.xhtml#toc-004" />
+</navPoint>
+<navPoint id="navPoint-6" playOrder="6">
+  <navLabel><text>第四章　一週間でスクリプト習得とかないから</text></navLabel>
+ <content src="Text/part0018.xhtml#toc-005" />
+</navPoint>
+<navPoint id="navPoint-7" playOrder="7">
+  <navLabel><text>第五章　背景使い回しはゲーム制作において必須の技術です</text></navLabel>
+ <content src="Text/part0019.xhtml#toc-006" />
+</navPoint>
+<navPoint id="navPoint-8" playOrder="8">
+  <navLabel><text>第六章　同じレーベルだとネタの貸し借りがしやすくていいよね</text></navLabel>
+ <content src="Text/part0022.xhtml#toc-007" />
+</navPoint>
+<navPoint id="navPoint-9" playOrder="9">
+  <navLabel><text>第七章　ちょ⁉　最終章で新キャラ三人とか！（深崎）</text></navLabel>
+ <content src="Text/part0025.xhtml#toc-008" />
+</navPoint>
+<navPoint id="navPoint-10" playOrder="10">
+  <navLabel><text>エピローグその一</text></navLabel>
+ <content src="Text/part0028.xhtml#toc-009" />
+</navPoint>
+<navPoint id="navPoint-11" playOrder="11">
+  <navLabel><text>エピローグその二</text></navLabel>
+ <content src="Text/part0031.xhtml#toc-010" />
+</navPoint>
+<navPoint id="navPoint-12" playOrder="12">
+  <navLabel><text>あとがき</text></navLabel>
+ <content src="Text/part0033.xhtml#toc-011" />
+</navPoint>
+<navPoint id="navPoint-13" playOrder="13">
+  <navLabel><text>奥付</text></navLabel>
+ <content src="Text/part0035.xhtml" />
+</navPoint>
+
+</navMap>
+</ncx>
