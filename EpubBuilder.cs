@@ -21,6 +21,7 @@ namespace UnpackKindleS
         List<byte[]> imgs = new List<byte[]>();
         List<string> img_names = new List<string>();
 
+
         string cover_name;
 
         string opf;
@@ -113,9 +114,10 @@ namespace UnpackKindleS
         }
         void ProcTextRef(XmlAttribute attr)
         {
-            Regex reg_link = new Regex("kindle:flow:([0-9|A-V]+)\\?mime=text/(.*)");
+            Regex reg_link = new Regex("kindle:flow:([0-9|A-V]+)\\?mime=.*?/(.*)");
             Match m = reg_link.Match(attr.Value);
-            if (!m.Success) { Log.log("link unsolved"); return; }
+            if (!m.Success)
+            { Log.log("link unsolved"); return; }
             int flowid = (int)Util.DecodeBase32(m.Groups[1].Value);
             string mime = m.Groups[2].Value;
             switch (mime)
@@ -131,8 +133,58 @@ namespace UnpackKindleS
                     }
                     attr.Value = "../Styles/" + name;
                     break;
-                case "svg":
-                    Log.log("warn:svg unhandled");
+                case "svg+xml":
+                    {
+                        string text = azw3.othertext[flowid - 1];
+                        XmlElement svg = attr.OwnerDocument.CreateElement("temp");
+                        svg.InnerXml = text;
+                        foreach (XmlNode n in svg.ChildNodes)
+                        {
+                            if (n.Name == "svg")
+                            {
+                                attr.OwnerElement.ParentNode.InsertBefore(n, attr.OwnerElement);
+                                attr.OwnerElement.ParentNode.RemoveChild(attr.OwnerElement);
+                                ProcNodes(n);
+                            }
+                            if (n.Name == "xml-stylesheet")
+                            {
+                                Regex reg_link2 = new Regex("kindle:flow:([0-9|A-V]+)\\?mime=.*?/(.*?)\"");
+                                Match ml = reg_link2.Match(n.OuterXml);
+                                if (ml.Success && ml.Groups[2].Value == "css")
+                                {
+                                    int flowid_ = (int)Util.DecodeBase32(ml.Groups[1].Value);
+                                    string name_ = "flow" + Util.Number(flowid_) + ".css";
+                                    bool alreadyHave = false;
+                                    foreach (XmlElement linktag in n.OwnerDocument.GetElementsByTagName("link"))
+                                    {
+                                        if (linktag.GetAttribute("href") == "../Styles/" + name_)
+                                        { alreadyHave = true; break; }
+                                    }
+                                    if (!alreadyHave)
+                                    {
+                                        //rel="stylesheet" type="text/css"
+                                        XmlElement l = n.OwnerDocument.CreateElement("link");
+                                        l.SetAttribute("href", "../Styles/" + name_);
+                                        l.SetAttribute("type", "text/css");
+                                        l.SetAttribute("rel", "stylesheet");
+                                        n.OwnerDocument.GetElementsByTagName("head")[0].AppendChild(l);
+                                        if (css_names.Find(s => s == name_) == null)
+                                        {
+                                            string csstext = azw3.othertext[flowid_ - 1];
+                                            csstext = ProcCSS(csstext);
+                                            csss.Add(csstext);
+                                            css_names.Add(name_);
+                                        }
+
+                                    }
+                                }
+                                else
+                                { Log.log("cannot find css link in xml-stylesheet"); }
+
+                            }
+                        }
+                        Log.log("SVG put into xhtml:Flow" + flowid);
+                    }
                     break;
             }
 

@@ -48,7 +48,7 @@ namespace UnpackKindleS
         public RESC_Section(Section section) : base(section)
         {
             if (type != "RESC") throw new UnpackKindleSException("Error on SectionRESC Process");
-            int zero = raw.Length - 1; while (raw[zero] != 0) zero--;
+            int zero = raw.Length - 1; while (raw[zero] == 0) zero--;
             string data = Encoding.UTF8.GetString(raw, 16, zero - 15);
             data = data.Substring(data.IndexOf('<'));
             string meta = Util.GetOuterXML(data, "metadata");
