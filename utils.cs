@@ -176,6 +176,7 @@ namespace UnpackKindleS
             p.StartInfo.FileName="packup.bat";
             p.StartInfo.Arguments="\""+outputfullpath+"\"";
             p.Start();
+            p.WaitForExit();
         }
     }
     public class Log

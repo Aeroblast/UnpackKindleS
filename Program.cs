@@ -153,6 +153,7 @@ namespace UnpackKindleS
             p.StartInfo.FileName = "dedrm.bat";
             p.StartInfo.Arguments = "\"" + file + "\"";
             p.Start();
+            p.WaitForExit();
         }
     }
 }
