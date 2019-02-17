@@ -10,6 +10,56 @@ namespace UnpackKindleS
         byte[] Decode(byte[] data);
 
     }
+
+
+    public class PalmdocDecoder : TextSectionDecoder
+    {
+        public byte[] Decode(byte[] data)
+        {
+            List<byte> r = new List<byte>();
+            int pos = 0;
+            while (pos < data.Length)
+            {
+                byte c = data[pos];
+                pos++;
+                if (c >= 1 && c <= 8)
+                {
+                    r.AddRange(Util.SubArray(data, pos, c));
+                    pos += c;
+                }
+                else if (c < 128)
+                {
+                    r.Add(c);
+                }
+                else if (c >= 192)
+                {
+                    r.Add(0x20);
+                    r.Add((byte)( c ^ 128));
+                }
+                else
+                {
+                    if (pos < data.Length)
+                    {
+                        int cx = (c << 8) | data[pos];
+                        pos++;
+                        int m = (cx >> 3) & 0x07ff;
+                        int n = (cx & 7) + 3;
+                        if (m > n) { r.AddRange(Util.SubArray(r.ToArray(), r.Count - m, n)); }
+                        else
+                        {
+                            for (int i = 0; i < n; i++)
+                            {
+                                if (m == 1) r.AddRange(Util.SubArray(r.ToArray(), r.Count - m, m));
+                                else r.Add(r[r.Count - m]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return r.ToArray();
+        }
+    }
     public class HuffmanDecoder : TextSectionDecoder
     {
         ulong[] mincode = new ulong[33];

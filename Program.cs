@@ -40,9 +40,9 @@ namespace UnpackKindleS
                 string[] args2 = new string[2];
                 args2[0] = s;
                 if (args.Length >= 2 && Directory.Exists(args[1])) args2[1] = args[1];
-                else args2[1]=Environment.CurrentDirectory;
+                else args2[1] = Environment.CurrentDirectory;
+                try { ProcPath(args2); } catch (Exception e) { Console.WriteLine(e); }
 
-                ProcPath(args2);
             }
         }
 
@@ -118,6 +118,7 @@ namespace UnpackKindleS
             {
                 string outname = "[" + azw3.mobi_header.extMeta.id_string[100] + "] " + azw3.title + ".epub";
                 Epub epub = new Epub(azw3, azw6);
+                if (Directory.Exists("temp")) DeleteDir("temp");
                 Directory.CreateDirectory("temp");
                 epub.Save("temp");
                 if (args.Length >= 2)
@@ -154,6 +155,12 @@ namespace UnpackKindleS
             p.StartInfo.Arguments = "\"" + file + "\"";
             p.Start();
             p.WaitForExit();
+        }
+        static void DeleteDir(string path)
+        {
+            foreach (string p in Directory.GetFiles(path)) File.Delete(p);
+            foreach (string p in Directory.GetDirectories(path)) DeleteDir(p);
+            Directory.Delete(path);
         }
     }
 }

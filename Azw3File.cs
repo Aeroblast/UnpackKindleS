@@ -49,6 +49,9 @@ namespace UnpackKindleS
         {
             switch (mobi_header.compression)
             {
+                case 2:
+                decoder=new PalmdocDecoder();
+                break;
                 case 0x4448:
                     {
                         HuffmanDecoder _decoder = new HuffmanDecoder(GetSectionData(mobi_header.huffman_start_index));
