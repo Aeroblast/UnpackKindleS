@@ -21,6 +21,8 @@ namespace UnpackKindleS
         List<byte[]> imgs = new List<byte[]>();
         List<string> img_names = new List<string>();
 
+        string cover_name;
+
         string opf;
         string ncx;
         public Epub(Azw3File azw3, Azw6File azw6 = null)
@@ -54,9 +56,15 @@ namespace UnpackKindleS
 
             subdir = Path.Combine(oepbs, "Text");
             Directory.CreateDirectory(subdir);
+            Regex fixer = new Regex("(<!DOCTYPE html.*?)\\[]>");//sigil 
             for (int i = 0; i < xhtml_names.Count; i++)
             {
-                xhtmls[i].Save(Path.Combine(subdir, xhtml_names[i]));
+                string p = Path.Combine(subdir, xhtml_names[i]);
+                xhtmls[i].Save(p);
+                string[] ss = File.ReadAllLines(p);
+                ss[1] = fixer.Replace(ss[1], "$1>");
+                File.WriteAllLines(p, ss);
+
             }
 
             subdir = Path.Combine(oepbs, "Styles");
@@ -157,7 +165,7 @@ namespace UnpackKindleS
         {
             Regex reg_link = new Regex("kindle:embed:([0-9|A-V]+)\\?mime=image/(.*)");
             Match m = reg_link.Match(attr.Value);
-            if (!m.Success) {Log.log("link unsolved"); return; }
+            if (!m.Success) { Log.log("link unsolved"); return; }
             int resid = (int)Util.DecodeBase32(m.Groups[1].Value) - 1;
             string name = AddImage(resid);
             attr.Value = "../Images/" + name;
@@ -206,8 +214,8 @@ namespace UnpackKindleS
                 if (azw3.sections[azw3.mobi_header.first_res_index + off].type == "Image")
                 {
                     string t = File.ReadAllText("template_cover.txt");
-                    string name = AddImage(off);
-                    cover = t.Replace("{❕image}", name);
+                    cover_name = AddImage(off);
+                    cover = t.Replace("{❕image}", cover_name);
                     xhtml_names.Insert(0, "cover.xhtml");
                     XmlDocument cover_ = new XmlDocument();
                     cover_.LoadXml(cover);
@@ -300,11 +308,12 @@ namespace UnpackKindleS
                 }
                 {
                     XmlElement x = meta.CreateElement("dc:creator");
+                    x.InnerText = azw3.mobi_header.extMeta.id_string[100];
+                    meta.FirstChild.AppendChild(x);
+
                     string fileas = azw3.mobi_header.extMeta.id_string[517];
                     if (fileas != null)
                         x.SetAttribute("opf:file-as", fileas);
-                    x.InnerText = azw3.mobi_header.extMeta.id_string[100];
-                    meta.FirstChild.AppendChild(x);
                 }
                 {
                     XmlElement x = meta.CreateElement("dc:publisher");
@@ -322,6 +331,7 @@ namespace UnpackKindleS
                     x.InnerText = date;
                     meta.FirstChild.AppendChild(x);
                 }
+
                 {
                     string v = azw3.mobi_header.extMeta.id_string[525];
                     if (v != null)
@@ -332,11 +342,19 @@ namespace UnpackKindleS
                         meta.FirstChild.AppendChild(x);
                     }
                 }
+                {
+                    XmlElement x = meta.CreateElement("meta");
+                    x.SetAttribute("name", "cover");
+                    x.SetAttribute("content", Path.GetFileNameWithoutExtension(cover_name));
+                    meta.FirstChild.AppendChild(x);
+
+                }
 
 
 
                 t = t.Replace("{❕meta}", Util.GetInnerXML((XmlElement)meta.FirstChild));
-                //string meta = azw3.resc.metadata.OuterXml;
+                //string metas = azw3.resc.metadata.OuterXml;
+                ((XmlElement)(azw3.resc.spine.FirstChild)).SetAttribute("toc", "ncx"); ;
                 string spine = azw3.resc.spine.OuterXml;
                 t = t.Replace("{❕spine}", spine.Replace("><", ">\n<"));
 

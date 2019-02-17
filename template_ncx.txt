@@ -5,6 +5,7 @@
     <meta name="dtb:depth" content="1" />
     <meta name="dtb:totalPageCount" content="0" />
     <meta name="dtb:maxPageNumber" content="0" />
+    <meta content="UnpackKindleS ver.20190217" name="dtb:generator"/>
   </head>
 <docTitle>
   <text>{❕Title}</text>

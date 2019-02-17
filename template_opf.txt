@@ -13,5 +13,6 @@
 </tours>
 <guide>
 {❕guide}
+<reference type="cover" title="Cover" href="Text/cover.xhtml"/>
 </guide>
 </package>
