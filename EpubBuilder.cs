@@ -352,6 +352,7 @@ namespace UnpackKindleS
                 {
                     XmlElement x = meta.CreateElement("dc:identifier");
                     x.SetAttribute("id", "ASIN");
+                    x.SetAttribute("opf:scheme","ASIN");
                     string z = azw3.mobi_header.extMeta.id_string[504];
                     if (z != null)
                         x.InnerXml = z;
