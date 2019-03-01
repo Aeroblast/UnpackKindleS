@@ -13,6 +13,10 @@ namespace UnpackKindleS
         {
             get { return mobi_header.title; }
         }
+        public string author
+        {
+            get { return mobi_header.extMeta.id_string[100]; }
+        }
         public byte[] rawML;
         public MobiHeader mobi_header;
 
@@ -20,7 +24,8 @@ namespace UnpackKindleS
         public FDST_Section fdst;
         public RESC_Section resc;
         public List<string> xhtmls = new List<string>();
-        public List<string> othertext = new List<string>();
+        public List<string> flows = new List<string>();//without first flow(main xhtmls)
+        public string[] flowProcessLog;
 
         public Azw3File(string path) : base(path)
         {
@@ -50,16 +55,19 @@ namespace UnpackKindleS
             switch (mobi_header.compression)
             {
                 case 2:
-                decoder=new PalmdocDecoder();
-                break;
+                    decoder = new PalmdocDecoder();
+                    break;
                 case 0x4448:
                     {
-                        HuffmanDecoder _decoder = new HuffmanDecoder(GetSectionData(mobi_header.huffman_start_index));
-                        sections[mobi_header.huffman_start_index] = new Huffman_Section();
+                        byte[] r;
+                        r=GetSectionData(mobi_header.huffman_start_index);
+                        HuffmanDecoder _decoder = new HuffmanDecoder(r);
+                        sections[mobi_header.huffman_start_index] = new Huffman_Section(r);
                         for (uint i = 0; i < mobi_header.huffman_count - 1; i++)
                         {
-                            _decoder.AddCDIC(GetSectionData(mobi_header.huffman_start_index + i + 1));
-                            sections[mobi_header.huffman_start_index + i + 1] = new HuffmanCDIC_Section();
+                            r=GetSectionData(mobi_header.huffman_start_index + i + 1);
+                            _decoder.AddCDIC(r);
+                            sections[mobi_header.huffman_start_index + i + 1] = new HuffmanCDIC_Section(r);
                         }
                         decoder = _decoder;
                     }
@@ -92,7 +100,7 @@ namespace UnpackKindleS
             List<byte> rawMLraw = new List<byte>();
             for (int i = 0; i < mobi_header.records; i++)
             {
-                sections[i + 1] = new Text_Section();
+                sections[i + 1] = new Text_Section(GetSectionData((uint)i+1));
                 rawMLraw.AddRange(decoder.Decode(Trim(GetSectionData((uint)(i + 1)))));
             }
             rawML = rawMLraw.ToArray();
@@ -135,7 +143,7 @@ namespace UnpackKindleS
             if (mobi_header.skel_index != 0xffffffff)
             {
                 skeleton_table = new List<Skeleton_item>();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.skel_index));
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.skel_index),"INDX(Skeleton)");
                 sections[mobi_header.skel_index] = main_indx;
                 main_indx.ReadTag();
                 for (uint i = 0; i < main_indx.header.any_count; i++)
@@ -155,7 +163,7 @@ namespace UnpackKindleS
             {
                 Hashtable ctoc_dict = new Hashtable();
                 frag_table = new List<Fragment_item>();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.frag_index));
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.frag_index),"INDX(Fragment)");
                 sections[mobi_header.frag_index] = main_indx;
                 main_indx.ReadTag();
                 int ctoc_off = 0;
@@ -187,7 +195,7 @@ namespace UnpackKindleS
             {
                 Hashtable ctoc_dict = new Hashtable();
                 guide_table = new List<Guide_item>();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.guide_index));
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.guide_index),"INDX(Guide)");
                 sections[mobi_header.guide_index] = main_indx;
                 main_indx.ReadTag();
                 int ctoc_off = 0;
@@ -219,7 +227,7 @@ namespace UnpackKindleS
             {
                 ncx_table = new List<NCX_item>();
                 Hashtable ctoc_dict = new Hashtable();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.ncx_index));
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.ncx_index),"INDX(NCX)");
                 sections[mobi_header.ncx_index] = main_indx;
                 main_indx.ReadTag();
                 int ctoc_off = 0;
@@ -262,11 +270,22 @@ namespace UnpackKindleS
 
         void BuildParts()
         {
-            uint[] lens = new uint[fdst.table.Length];
-            for (int i = 0; i < lens.Length - 1; i++) lens[i] = fdst.table[i + 1] - fdst.table[i];
-            lens[fdst.table.Length - 1] = (uint)rawML.Length - fdst.table[fdst.table.Length - 1];
+            uint[] lens;
+            byte[] texts;
+            if (fdst == null)
+            {
+                lens = new uint[1];
+                texts = rawML;
+            }
+            else
+            {
+                lens = new uint[fdst.table.Length];
+                for (int i = 0; i < lens.Length - 1; i++) lens[i] = fdst.table[i + 1] - fdst.table[i];
+                lens[fdst.table.Length - 1] = (uint)rawML.Length - fdst.table[fdst.table.Length - 1];
+                texts = Util.SubArray(rawML, fdst.table[0], lens[0]);
+            }
 
-            byte[] texts = Util.SubArray(rawML, fdst.table[0], lens[0]);
+
             int frag_index = 0;
             foreach (var ske in skeleton_table)
             {
@@ -290,7 +309,7 @@ namespace UnpackKindleS
             }
             for (int i = 1; i < lens.Length; i++)
             {
-                othertext.Add(Encoding.UTF8.GetString(Util.SubArray(rawML, fdst.table[i], lens[i])));
+                flows.Add(Encoding.UTF8.GetString(Util.SubArray(rawML, fdst.table[i], lens[i])));
             }
         }
 

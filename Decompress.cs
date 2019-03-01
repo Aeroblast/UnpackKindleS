@@ -179,10 +179,12 @@ namespace UnpackKindleS
     //方便在debug监视器看
     class HuffmanCDIC_Section : Section
     {
-        public HuffmanCDIC_Section() : base("Hunffman CDIC", null) { }
+        int size;override public int GetSize(){return size;}
+        public HuffmanCDIC_Section(byte[] r) : base("Hunffman CDIC", null) { size=r.Length; }
     }
     class Huffman_Section : Section
     {
-        public Huffman_Section() : base("Hunffman", null) { }
+        int size;override public int GetSize(){return size;}
+        public Huffman_Section(byte[] r ) : base("Hunffman", null) {size=r.Length; }
     }
 }

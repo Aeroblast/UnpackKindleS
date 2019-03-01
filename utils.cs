@@ -179,15 +179,7 @@ namespace UnpackKindleS
             p.WaitForExit();
         }
     }
-    public class Log
-    {
-        static string t = "";
-        public static void log(string s)
-        {
-            t += s + "\r\n";
-            Console.WriteLine(s);
-        }
-    }
+
     [System.Serializable]
     public class UnpackKindleSException : System.Exception
     {

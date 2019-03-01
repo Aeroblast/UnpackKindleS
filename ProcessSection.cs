@@ -10,18 +10,20 @@ namespace UnpackKindleS
     {
         public string type;
         public byte[] raw;
+        virtual public int GetSize(){return raw.Length;}
+
+        public string comment="";
 
         public Section(byte[] raw)
         {
+            this.raw = raw;
             if(raw.Length<4){type="Empty Section";return;}
             type = Encoding.ASCII.GetString(raw, 0, 4);
-            this.raw = raw;
-
         }
         public Section(Section s) { type = s.type; raw = s.raw; }
         public Section(string type, byte[] raw) { this.type = type; this.raw = raw; }
     }
-    public class Text_Section : Section { public Text_Section() : base("Text", null) { } }
+    public class Text_Section : Section { public Text_Section(byte[] r ) : base("Text", null) {size=r.Length; }int size;override public int GetSize(){return size;} }
     public class Image_Section : Section
     {
         public string ext;
@@ -87,7 +89,7 @@ namespace UnpackKindleS
         public byte tag_value(int i) { return raw[tag_table_start + i * 4 + 1]; }
         public byte mask(int i) { return raw[tag_table_start + i * 4 + 2]; }
         public byte endflag(int i) { return raw[tag_table_start + i * 4 + 3]; }
-        public INDX_Section_Main(byte[] data) : base(data) { ReadTag(); }
+        public INDX_Section_Main(byte[] data,string type) : base(data) {this.type=type; ReadTag(); }
         public void ReadTag()//for main section
         {
             uint off = header.tag_part_start;
@@ -106,7 +108,7 @@ namespace UnpackKindleS
         public INDX_Section_Tag[] tags;
         public Hashtable[] tagmaps;
         public string[] texts;
-        public INDX_Section_Extra(byte[] data, INDX_Section_Main m) : base(data) { main_sec = m; }
+        public INDX_Section_Extra(byte[] data, INDX_Section_Main m) : base(data) {type="INDX Section (Extra)"; main_sec = m; }
         public void ReadTagMap()//for the following extra section
         {
             index_pos = new UInt32[header.any_count + 1];
@@ -221,6 +223,7 @@ namespace UnpackKindleS
         public Hashtable ctoc_data;
         public CTOC_Section(byte[]data):base(data)
         {
+            type="CTOC";
             ctoc_data=new Hashtable();
             int offset=0,idx_offs;
             while(offset<data.Length)

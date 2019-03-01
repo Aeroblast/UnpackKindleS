@@ -30,6 +30,7 @@ namespace UnpackKindleS
         {
             this.azw3 = azw3;
             this.azw6 = azw6;
+            azw3.flowProcessLog = new string[azw3.flows.Count];
             for (int i = 0; i < azw3.xhtmls.Count; i++)
                 xhtml_names.Add("part" + Util.Number(i) + ".xhtml");
             foreach (string xhtml in azw3.xhtmls)
@@ -43,6 +44,14 @@ namespace UnpackKindleS
             CreateCover();
             CreateNCX();
             CreateOPF();
+            {
+                uint thumb_offset = 0;
+                if (azw3.mobi_header.extMeta.id_value.TryGetValue(202, out thumb_offset))
+                {
+                    azw3.sections[azw3.mobi_header.first_res_index+thumb_offset].comment="Thumb Cover, Ignored";
+                }
+            }
+
         }
         public void Save(string dir)
         {
@@ -126,16 +135,17 @@ namespace UnpackKindleS
                     string name = "flow" + Util.Number(flowid) + ".css";
                     if (css_names.Find(s => s == name) == null)
                     {
-                        string csstext = azw3.othertext[flowid - 1];
+                        string csstext = azw3.flows[flowid - 1];
                         csstext = ProcCSS(csstext);
                         csss.Add(csstext);
                         css_names.Add(name);
+                        azw3.flowProcessLog[flowid - 1] = name;
                     }
                     attr.Value = "../Styles/" + name;
                     break;
                 case "svg+xml":
                     {
-                        string text = azw3.othertext[flowid - 1];
+                        string text = azw3.flows[flowid - 1];
                         XmlElement svg = attr.OwnerDocument.CreateElement("temp");
                         svg.InnerXml = text;
                         foreach (XmlNode n in svg.ChildNodes)
@@ -170,10 +180,11 @@ namespace UnpackKindleS
                                         n.OwnerDocument.GetElementsByTagName("head")[0].AppendChild(l);
                                         if (css_names.Find(s => s == name_) == null)
                                         {
-                                            string csstext = azw3.othertext[flowid_ - 1];
+                                            string csstext = azw3.flows[flowid_ - 1];
                                             csstext = ProcCSS(csstext);
                                             csss.Add(csstext);
                                             css_names.Add(name_);
+                                            azw3.flowProcessLog[flowid_ - 1] = name_;
                                         }
 
                                     }
@@ -183,7 +194,7 @@ namespace UnpackKindleS
 
                             }
                         }
-                        Log.log("SVG put into xhtml:Flow" + flowid);
+                        azw3.flowProcessLog[flowid - 1] = "Flow" + Util.Number(flowid) + " svg has been put into xhtmls";
                     }
                     break;
             }
@@ -206,7 +217,7 @@ namespace UnpackKindleS
         {
             Regex reg_html_id = new Regex("<.*? id=\"(.*?)\".*?>");
             Fragment_item frag = azw3.frag_table[fid];
-            byte[] t = Util.SubArray(azw3.rawML, frag.pos_in_raw + off, frag.length);
+            byte[] t = Util.SubArray(azw3.rawML, frag.pos_in_raw + off, frag.length - off);
             string s = Encoding.UTF8.GetString(t);
             Match m = reg_html_id.Match(s);
             if (m.Success)
@@ -223,6 +234,8 @@ namespace UnpackKindleS
             attr.Value = "../Images/" + name;
 
         }
+
+        //Process CSS file: Resolve links in css file
         string ProcCSS(string text)
         {
             string r = text;
@@ -233,10 +246,11 @@ namespace UnpackKindleS
                 string name = "flow" + Util.Number(flowid) + ".css";
                 if (css_names.Find(s => s == name) == null)
                 {
-                    string csstext = azw3.othertext[flowid - 1];
+                    string csstext = azw3.flows[flowid - 1];
                     csstext = ProcCSS(csstext);
                     csss.Add(csstext);
                     css_names.Add(name);
+                    azw3.flowProcessLog[flowid - 1] = name;
                 }
                 r = r.Replace(m.Groups[0].Value, "url(" + name + ")");
             }
@@ -352,7 +366,7 @@ namespace UnpackKindleS
                 {
                     XmlElement x = meta.CreateElement("dc:identifier");
                     x.SetAttribute("id", "ASIN");
-                    x.SetAttribute("opf:scheme","ASIN");
+                    x.SetAttribute("opf:scheme", "ASIN");
                     string z = azw3.mobi_header.extMeta.id_string[504];
                     if (z != null)
                         x.InnerXml = z;
@@ -412,10 +426,11 @@ namespace UnpackKindleS
                 t = t.Replace("{❕spine}", spine.Replace("><", ">\n<"));
 
                 string guide = "";
-                foreach (Guide_item g in azw3.guide_table)
-                {
-                    guide += string.Format("<reference type=\"{2}\" title=\"{0}\" href=\"{1}\" />\n", g.ref_name, Path.Combine("Text", xhtml_names[g.num + 1]), g.ref_type);
-                }
+                if (azw3.guide_table != null)
+                    foreach (Guide_item g in azw3.guide_table)
+                    {
+                        guide += string.Format("<reference type=\"{2}\" title=\"{0}\" href=\"{1}\" />\n", g.ref_name, Path.Combine("Text", xhtml_names[g.num + 1]), g.ref_type);
+                    }
 
                 t = t.Replace("{❕guide}", guide);
                 opf = t;
@@ -446,6 +461,8 @@ namespace UnpackKindleS
                     CRES_Section sec = (CRES_Section)azw6.sections[r];
                     name = ImageNameHD(id, sec);
                     data = sec.img;
+                    sec.comment = name;
+                    azw3.sections[azw3.mobi_header.first_res_index + id].comment = name + " (HD version in azw6)";
 
                 }
             }
@@ -454,6 +471,7 @@ namespace UnpackKindleS
                 Image_Section section = (Image_Section)azw3.sections[azw3.mobi_header.first_res_index + id];
                 name = ImageName(id, section);
                 data = section.raw;
+                section.comment = name;
             }
 
             if (img_names.Find(s => s == name) != null) return name;

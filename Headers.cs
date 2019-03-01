@@ -28,7 +28,7 @@ namespace UnpackKindleS
                 if (IdMapping.id_map_strings.ContainsKey(id))
                 {
                     string a = Encoding.UTF8.GetString(Util.SubArray(ext, pos + 8, size - 8));
-                    Log.log(" " + IdMapping.id_map_strings[id] + ":" + a);
+                    //Log.log(" " + IdMapping.id_map_strings[id] + ":" + a);
                     id_string.Add(id, a);
                 }
                 else
@@ -42,14 +42,14 @@ namespace UnpackKindleS
                         case 12: a = Util.GetUInt32(ext, pos + 8); break;
                         default: Log.log("unexpected size:" + size); break;
                     }
-                    Log.log(" " + IdMapping.id_map_values[id] + ":" + a);
+                   // Log.log(" " + IdMapping.id_map_values[id] + ":" + a);
                     id_value.Add(id, a);
                 }
                 else
                 if (IdMapping.id_map_hex.ContainsKey(id))
                 {
                     string a = Util.ToHexString(ext, pos + 8, size - 8);
-                    Log.log(" " + IdMapping.id_map_hex[id] + ":" + a);
+                   // Log.log(" " + IdMapping.id_map_hex[id] + ":" + a);
                     id_hex.Add(id, a);
                 }
                 else
@@ -81,7 +81,6 @@ namespace UnpackKindleS
             {
                 huffman_start_index = Util.GetUInt32(header, 0x70);
                 huffman_count = Util.GetUInt32(header, 0x74);
-
             }
             length = Util.GetUInt32(header, 20);
             mobi_type = Util.GetUInt32(header, 24);
@@ -132,7 +131,7 @@ namespace UnpackKindleS
             if (info.codepage != 65001) return;
             Byte[] title_raw = Util.SubArray(header_raw, info.title_offset, info.title_length);
             title = Encoding.UTF8.GetString(title_raw);
-            Log.log("Azw6 File Title:" + title);
+            //Log.log("Azw6 File Title:" + title);
             Byte[] ext = Util.SubArray(header_raw,
             48,
             header_raw.Length - 48

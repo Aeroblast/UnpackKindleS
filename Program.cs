@@ -132,7 +132,7 @@ namespace UnpackKindleS
                     if (outdir == "") { outdir = Environment.CurrentDirectory; }
                     Util.Packup(Path.Combine(outdir, outname));
                 }
-
+Log.log(azw3);
             }
             else
             {
