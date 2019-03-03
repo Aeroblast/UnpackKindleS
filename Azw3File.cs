@@ -276,6 +276,7 @@ namespace UnpackKindleS
             {
                 lens = new uint[1];
                 texts = rawML;
+                Log.log("Warning:Cannot find FDST Section.");
             }
             else
             {

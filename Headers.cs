@@ -29,7 +29,16 @@ namespace UnpackKindleS
                 {
                     string a = Encoding.UTF8.GetString(Util.SubArray(ext, pos + 8, size - 8));
                     //Log.log(" " + IdMapping.id_map_strings[id] + ":" + a);
-                    id_string.Add(id, a);
+                    if (id_string.ContainsKey(id))
+                    {
+                        if(id==100||id==517)
+                        {
+                            id_string[id]+="&"+a;
+                        }
+                        Log.log(string.Format("Meta id duplicate:{0}\nPervious:{1}  \nLatter:{2}", IdMapping.id_map_strings[id], id_string[id], a));
+                    }
+                    else
+                        id_string.Add(id, a);
                 }
                 else
                 if (IdMapping.id_map_values.ContainsKey(id))
@@ -42,15 +51,25 @@ namespace UnpackKindleS
                         case 12: a = Util.GetUInt32(ext, pos + 8); break;
                         default: Log.log("unexpected size:" + size); break;
                     }
-                   // Log.log(" " + IdMapping.id_map_values[id] + ":" + a);
-                    id_value.Add(id, a);
+                    // Log.log(" " + IdMapping.id_map_values[id] + ":" + a);
+                    if (id_value.ContainsKey(id))
+                    {
+                        Log.log(string.Format("Meta id duplicate:{0}\nPervious:{1}  \nLatter:{2}", IdMapping.id_map_values[id], id_value[id], a));
+                    }
+                    else
+                        id_value.Add(id, a);
                 }
                 else
                 if (IdMapping.id_map_hex.ContainsKey(id))
                 {
                     string a = Util.ToHexString(ext, pos + 8, size - 8);
-                   // Log.log(" " + IdMapping.id_map_hex[id] + ":" + a);
-                    id_hex.Add(id, a);
+                    // Log.log(" " + IdMapping.id_map_hex[id] + ":" + a);
+                    if (id_hex.ContainsKey(id))
+                    {
+                        Log.log(string.Format("Meta id duplicate:{0}\nPervious:{1}  \nLatter:{2}", IdMapping.id_map_hex[id], id_hex[id], a));
+                    }
+                    else
+                        id_hex.Add(id, a);
                 }
                 else
                 {
@@ -122,7 +141,7 @@ namespace UnpackKindleS
         public ExtMeta meta;
         public string title;
 
-        public Azw6Header(byte[] header_raw) : base("Azw6 Header",header_raw)
+        public Azw6Header(byte[] header_raw) : base("Azw6 Header", header_raw)
         {
             int header_size = Marshal.SizeOf(typeof(Azw6HeaderInfo));
             // Byte[] header_raw = Util.SubArray(azw6_data, section_info[0].start_addr, (ulong)header_size);

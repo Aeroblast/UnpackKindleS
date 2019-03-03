@@ -48,7 +48,7 @@ namespace UnpackKindleS
                 uint thumb_offset = 0;
                 if (azw3.mobi_header.extMeta.id_value.TryGetValue(202, out thumb_offset))
                 {
-                    azw3.sections[azw3.mobi_header.first_res_index+thumb_offset].comment="Thumb Cover, Ignored";
+                    azw3.sections[azw3.mobi_header.first_res_index + thumb_offset].comment = "Thumb Cover, Ignored";
                 }
             }
 
@@ -374,13 +374,20 @@ namespace UnpackKindleS
 
                 }
                 {
-                    XmlElement x = meta.CreateElement("dc:creator");
-                    x.InnerText = azw3.mobi_header.extMeta.id_string[100];
-                    meta.FirstChild.AppendChild(x);
+                    string[] creatername = azw3.mobi_header.extMeta.id_string[100].Split('&');
+                    string[] sortname = new string[0];
+                    if (azw3.mobi_header.extMeta.id_string.ContainsKey(517))
+                        sortname = azw3.mobi_header.extMeta.id_string[517].Split('&');
+                    for (int l = 0; l < creatername.Length; l++)
+                    {
+                        XmlElement x = meta.CreateElement("dc:creator");
+                        x.InnerText = creatername[l];
+                        meta.FirstChild.AppendChild(x);
 
-                    string fileas = azw3.mobi_header.extMeta.id_string[517];
-                    if (fileas != null)
-                        x.SetAttribute("opf:file-as", fileas);
+                        if (l < sortname.Length)
+                            x.SetAttribute("opf:file-as", sortname[l]);
+                    }
+
                 }
                 {
                     XmlElement x = meta.CreateElement("dc:publisher");

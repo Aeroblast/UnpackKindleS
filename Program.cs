@@ -116,7 +116,7 @@ namespace UnpackKindleS
                 azw6 = new Azw6File(azw6_path);
             if (azw3 != null)
             {
-                string outname = "[" + azw3.mobi_header.extMeta.id_string[100] + "] " + azw3.title + ".epub";
+                string outname = "[" + azw3.mobi_header.extMeta.id_string[100].Split('&')[0] + "] " + azw3.title + ".epub";
                 Epub epub = new Epub(azw3, azw6);
                 if (Directory.Exists("temp")) DeleteDir("temp");
                 Directory.CreateDirectory("temp");
