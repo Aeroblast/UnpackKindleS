@@ -121,6 +121,7 @@ namespace UnpackKindleS
                 if (Directory.Exists("temp")) DeleteDir("temp");
                 Directory.CreateDirectory("temp");
                 epub.Save("temp");
+                Log.log(azw3);
                 if (args.Length >= 2)
                     if (Directory.Exists(args[1]))
                     {
@@ -132,7 +133,6 @@ namespace UnpackKindleS
                     if (outdir == "") { outdir = Environment.CurrentDirectory; }
                     Util.Packup(Path.Combine(outdir, outname));
                 }
-Log.log(azw3);
             }
             else
             {

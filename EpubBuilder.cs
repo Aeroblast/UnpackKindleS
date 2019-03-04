@@ -41,8 +41,8 @@ namespace UnpackKindleS
                 ProcNodes(doc.DocumentElement);
 
             }
-            CreateCover();
             CreateNCX();
+            CreateCover();
             CreateOPF();
             {
                 uint thumb_offset = 0;
@@ -213,7 +213,7 @@ namespace UnpackKindleS
 
             attr.Value = KindlePosToUri(fid, off);
         }
-        string KindlePosToUri(int fid, int off)
+        string KindlePosToUri(int fid, int off)//务必在插入封面前调用
         {
             Regex reg_html_id = new Regex("<.*? id=\"(.*?)\".*?>");
             Fragment_item frag = azw3.frag_table[fid];
