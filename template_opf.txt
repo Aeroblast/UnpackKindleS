@@ -5,7 +5,7 @@
 <!-- Other meta from azw3
 {❕othermeta}
 -->
-<dc:contributor opf:role="bkp">UnpackKindleS ver 20190303</dc:contributor>
+<dc:contributor opf:role="bkp">UnpackKindleS ver 20190304</dc:contributor>
   </metadata>
 {❕manifest}
 {❕spine}
