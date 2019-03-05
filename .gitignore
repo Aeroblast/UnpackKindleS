@@ -3,4 +3,5 @@ obj/
 sample*
 temp/
 *.epub
+*.log
 

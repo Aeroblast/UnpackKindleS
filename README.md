@@ -6,25 +6,34 @@
 
 ## 使用方法
 
-### 使用前
-请确保转换的输入文件已经经过了DeDRM 或者 在命令选项中选择了dedrm并正确配置了dedrm.bat
+### 使用Release版
 
-请确保你的PC装有7z,并且确认packup.bat中的执行命令可用；如果想用其他打包工具可以自己编辑packup.bat
+[下载可执行文件]https://github.com/Aeroblast/UnpackKindleS/releases
 
-安装dotnet core
+#### 简单的使用方法
 
+使用Release版**不要**下载源码中的bat。
 
-### 使用方法
+方式1：将需要转换的azw3和azw.res放在同一目录，任选其一或者将文件夹拖到_Tool_Drop_Single.bat上。输出在同目录下。
 
-命令行参数为：
-<XXX_nodrm.azw3或azw.res或包含以上文件的文件夹名称> [<输出文档>] [<开关>]
+方式2：配置好dedrm.bat，将My Kindle Content拖到_Tool_Drop_MyKindleContent.bat上。批量输出在My Kindle Content 里面。
 
-程序会在
-第一个参数为文件时搜索同目录的其他文件
+#### 详细说明
+命令行参数格式：
+ `` KindleUnpackS <XXX_nodrm.azw3或azw.res或包含以上文件的文件夹名称> [<输出文档>] [<开关>] ``
 
-不指定**输出文档**的情况下，输出为第一个参数的同目录下
+开关选项：
 
-# 简单的使用方法：将需要转换的文件或者文件夹拖到相应标有Tool的bat上即可 
+-dedrm 调用dedrm.bat处理处理文件夹时遇到的.azw文件。需要在dedrm.bat配置路径。
+
+-batch 检测文件夹中含有EBOK的文件夹并处理。用于处理My Kindle Content。
+
+可以参考提供的bat
+
+### 使用开发版
+
+安装dotnet core，，请使用源码中的bat，其他同上。
+
 
 ## 其他说明
 
@@ -34,5 +43,5 @@
 
 由于没有那么多测试，可能有各种各样的问题，会尽力修。
 
-转换完可以看一眼是不是所有flow和图片Section都被转换了。
+转换完可以看一眼命令行输出或者lastrun.log是不是所有flow和图片Section都被转换了。
 

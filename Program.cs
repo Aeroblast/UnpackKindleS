@@ -10,8 +10,10 @@ namespace UnpackKindleS
     class Program
     {
         static bool dedrm = false;
+        static bool end_of_proc=false;
         static void Main(string[] args)
         {
+            Console.WriteLine("UnpackKindleS Ver.20190305");
             if (args.Length < 1)
             {
                 Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
@@ -28,8 +30,8 @@ namespace UnpackKindleS
                     case "-batch": ProcBatch(args); break;
                 }
             }
-            ProcPath(args);
-
+            if(!end_of_proc)ProcPath(args);
+            Log.Save("lastrun.log");
         }
         static void ProcBatch(string[] args)
         {
@@ -41,9 +43,10 @@ namespace UnpackKindleS
                 args2[0] = s;
                 if (args.Length >= 2 && Directory.Exists(args[1])) args2[1] = args[1];
                 else args2[1] = Environment.CurrentDirectory;
-                try { ProcPath(args2); } catch (Exception e) { Console.WriteLine(e); }
+                try { ProcPath(args2); } catch (Exception e) { Log.log(e.ToString()); }
 
             }
+            end_of_proc=true;
         }
 
         static void ProcPath(string[] args)
@@ -111,7 +114,10 @@ namespace UnpackKindleS
             Azw3File azw3 = null;
             Azw6File azw6 = null;
             if (azw3_path != null)
+            {
+                Log.log("==============START===============");
                 azw3 = new Azw3File(azw3_path);
+            }
             if (azw6_path != null)
                 azw6 = new Azw6File(azw6_path);
             if (azw3 != null)
@@ -122,21 +128,24 @@ namespace UnpackKindleS
                 Directory.CreateDirectory("temp");
                 epub.Save("temp");
                 Log.log(azw3);
+                string output_path;
                 if (args.Length >= 2)
                     if (Directory.Exists(args[1]))
                     {
-                        Util.Packup(Path.Combine(args[1], outname));
-                        return;
+                        output_path=Path.Combine(args[1], outname);
                     }
                 {
                     string outdir = Path.GetDirectoryName(args[0]);
-                    if (outdir == "") { outdir = Environment.CurrentDirectory; }
-                    Util.Packup(Path.Combine(outdir, outname));
+                    output_path=Path.Combine(outdir, outname);
                 }
+                Util.Packup(output_path);
+                Log.log("azw3 source:"+azw3_path);
+                if(azw6_path!=null)
+                Log.log("azw6 source:"+azw6_path);
             }
             else
             {
-                Console.WriteLine("Cannot find .azw3 file");
+                Console.WriteLine("Cannot find .azw3 file in "+p);
             }
         }
         static void test()

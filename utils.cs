@@ -1,8 +1,9 @@
 using System;
+using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Xml;
-using System.Diagnostics;
 namespace UnpackKindleS
 {
 
@@ -57,22 +58,6 @@ namespace UnpackKindleS
         public static byte GetUInt8(byte[] src, ulong start)
         {
             return src[start];
-        }
-        public static UInt32 i32(string a)
-        {
-            return
-            (((uint)a[0]) << 24)
-            + (((uint)a[1]) << 16)
-            + (((uint)a[2]) << 8)
-            + (((uint)a[3]));
-        }
-        public static UInt32 i32(byte[] a)
-        {
-            return
-            (((uint)a[0]) << 24)
-            + (((uint)a[1]) << 16)
-            + (((uint)a[2]) << 8)
-            + (((uint)a[3]));
         }
 
         public static string GuessImageType(byte[] data)
@@ -172,11 +157,12 @@ namespace UnpackKindleS
 
         public static void Packup(string outputfullpath)
         {
-            Process p=new Process();
-            p.StartInfo.FileName="packup.bat";
-            p.StartInfo.Arguments="\""+outputfullpath+"\"";
-            p.Start();
-            p.WaitForExit();
+            if (File.Exists(outputfullpath))
+            {
+                File.Delete(outputfullpath);
+            }
+            ZipFile.CreateFromDirectory("temp",outputfullpath);
+            Log.log("Saved:"+outputfullpath);
         }
     }
 
