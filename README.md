@@ -8,7 +8,7 @@
 
 ### 使用Release版
 
-[下载可执行文件]https://github.com/Aeroblast/UnpackKindleS/releases
+[到这里下载可执行文件](https://github.com/Aeroblast/UnpackKindleS/releases)
 
 #### 简单的使用方法
 
@@ -24,9 +24,9 @@
 
 开关选项：
 
--dedrm 调用dedrm.bat处理处理文件夹时遇到的.azw文件。需要在dedrm.bat配置路径。
+`` -dedrm `` 调用dedrm.bat处理处理文件夹时遇到的.azw文件。需要在dedrm.bat配置路径。
 
--batch 检测文件夹中含有EBOK的文件夹并处理。用于处理My Kindle Content。
+`` -batch `` 检测文件夹中含有EBOK的文件夹并处理。用于处理My Kindle Content。
 
 可以参考提供的bat
 
