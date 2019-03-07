@@ -263,11 +263,12 @@ namespace UnpackKindleS
             string np_temp = "<navPoint id=\"navPoint-{0}\" playOrder=\"{0}\">\n  <navLabel><text>{1}</text></navLabel>\n <content src=\"{2}\" />\n</navPoint>\n";
             string np = "";
             int i = 1;
-            foreach (NCX_item info in azw3.ncx_table)
-            {
-                np += String.Format(np_temp, i, info.title, "Text/" + KindlePosToUri(info.fid, info.off));
-                i++;
-            }
+            if (azw3.ncx_table != null)
+                foreach (NCX_item info in azw3.ncx_table)
+                {
+                    np += String.Format(np_temp, i, info.title, "Text/" + KindlePosToUri(info.fid, info.off));
+                    i++;
+                }
             t = t.Replace("{❕navMap}", np);
             t = t.Replace("{❕Title}", azw3.title);
             ncx = t;
@@ -313,8 +314,11 @@ namespace UnpackKindleS
                     item.SetAttribute("media-type", "application/xhtml+xml");
                     mani_root.AppendChild(item);
                     i++;
+                    if (i >= xhtmls.Count)                  
+                        break;                  
                 }
-                if (i != xhtmls.Count) { Log.log("Warning: Not all xhtml added to item."); }
+                if(azw3.resc.spine.FirstChild.ChildNodes.Count>xhtmls.Count)Log.log("Warning: Missing Parts. Ignore if this is a book sample.");
+                if (i < xhtmls.Count) { Log.log("Warning: Not all xhtml added to item."); }
 
                 foreach (string imgname in img_names)
                 {
@@ -431,7 +435,7 @@ namespace UnpackKindleS
                 ((XmlElement)(azw3.resc.spine.FirstChild)).SetAttribute("toc", "ncx"); ;
                 string spine = azw3.resc.spine.OuterXml;
                 t = t.Replace("{❕spine}", spine.Replace("><", ">\n<"));
-
+                t=t.Replace("{❕version}",Version.version);
                 string guide = "";
                 if (azw3.guide_table != null)
                     foreach (Guide_item g in azw3.guide_table)

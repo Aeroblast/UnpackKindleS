@@ -13,7 +13,7 @@ namespace UnpackKindleS
         static bool end_of_proc=false;
         static void Main(string[] args)
         {
-            Console.WriteLine("UnpackKindleS Ver.20190305");
+            Console.WriteLine("UnpackKindleS Ver."+Version.version);
             if (args.Length < 1)
             {
                 Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
@@ -38,7 +38,7 @@ namespace UnpackKindleS
             string[] dirs = Directory.GetDirectories(args[0]);
             foreach (string s in dirs)
             {
-                if (!s.Contains("EBOK")) return;
+                if (!s.Contains("EBOK")) continue;
                 string[] args2 = new string[2];
                 args2[0] = s;
                 if (args.Length >= 2 && Directory.Exists(args[1])) args2[1] = args[1];
