@@ -457,7 +457,7 @@ namespace UnpackKindleS
         {
             return "embed" + Util.Number(resid) + section.ext;
         }
-        string ImageNameHD(int resid, CRES_Section section)
+        public static string ImageNameHD(int resid, CRES_Section section)
         {
             return "embed" + Util.Number(resid) + "_HD" + section.ext;
         }

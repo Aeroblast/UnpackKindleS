@@ -1,1 +1,1 @@
-"C:\Python27\python.exe" "E:\Apps\DeDRM_App\DeDRM_lib\DeDRM_App.pyw" %1
+"C:\Python2\python2.exe" "E:\_Download\DeDRM_tools_6.6.2\DeDRM_Windows_Application\DeDRM_App\DeDRM_lib\DeDRM_App.pyw" %1

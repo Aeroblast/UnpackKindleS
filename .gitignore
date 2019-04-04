@@ -1,7 +1,10 @@
-bin/
+bin/release*
+bin/app
+bin/debug
 obj/
 sample*
 temp/
 *.epub
 *.log
+dedrm.bat
 

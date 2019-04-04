@@ -19,10 +19,17 @@ namespace UnpackKindleS
                 Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
                 return;
             }
+            
             foreach (string a in args)
             {
                 if (a.ToLower() == "-dedrm") dedrm = true;
+                if(a.ToLower()=="--just-dump-res")
+                {
+                    DumpHDImage(args);
+                    end_of_proc=true;
+                }
             }
+            if(!end_of_proc)
             foreach (string a in args)
             {
                 switch (a.ToLower())
@@ -148,6 +155,25 @@ namespace UnpackKindleS
                 Console.WriteLine("Cannot find .azw3 file in "+p);
             }
         }
+        
+        static void DumpHDImage(string[] args)
+        {
+            Log.log("Dump azw.res");
+            Log.log("azw6 source:"+args[0]);
+            string outputdir="";
+            if(!File.Exists(args[0])){Log.log("File was not found:"+args[0]);return;}
+            Azw6File azw=new Azw6File(args[0]);
+            if(args.Length>=3)outputdir=args[1];
+            else{outputdir=Path.Combine(Path.GetDirectoryName(args[0]), azw.header.title) ;}
+            if(!CreateDirectory(outputdir)){return;}
+            foreach(var a in azw.image_sections)
+            {
+                CRES_Section sec=(CRES_Section)azw.sections[a];
+                string filename = Epub.ImageNameHD(a-1, sec);
+                File.WriteAllBytes(Path.Combine(outputdir,filename),sec.img);
+                Log.log("Saved:"+Path.Combine(outputdir,filename));
+            }
+        }
         static void test()
         {
             Azw6File azw6 = new Azw6File(@"sample.azw.res");
@@ -170,6 +196,25 @@ namespace UnpackKindleS
             foreach (string p in Directory.GetFiles(path)) File.Delete(p);
             foreach (string p in Directory.GetDirectories(path)) DeleteDir(p);
             Directory.Delete(path);
+        }
+        static bool CreateDirectory(string path)
+        {
+            try
+            {
+            if(!Directory.Exists(path))
+            {
+                string parent=Path.GetDirectoryName(path);
+                if(Directory.Exists(parent))Directory.CreateDirectory(path);
+                else{CreateDirectory(parent);Directory.CreateDirectory(path);} 
+            }
+            }
+            catch(Exception e)
+            {
+                Log.log(e.ToString());
+                return false;
+            }
+
+            return true;
         }
     }
 }
