@@ -6,4 +6,5 @@ temp/
 *.log
 dedrm.bat
 Release
+.vscode
 
