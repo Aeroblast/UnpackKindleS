@@ -185,8 +185,12 @@ namespace UnpackKindleS
 
         static void DeDRM(string file)
         {
+            string fn="";
+            if(File.Exists("dedrm.bat")){fn="dedrm.bat";}
+            else if(File.Exists("..\\dedrm.bat")){fn="..\\dedrm.bat";}
+            else{Log.log("Cannot found dedrm.bat"); return;}
             Process p = new Process();
-            p.StartInfo.FileName = "dedrm.bat";
+            p.StartInfo.FileName = fn;
             p.StartInfo.Arguments = "\"" + file + "\"";
             p.Start();
             p.WaitForExit();

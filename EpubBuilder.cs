@@ -271,6 +271,8 @@ namespace UnpackKindleS
                 }
             t = t.Replace("{❕navMap}", np);
             t = t.Replace("{❕Title}", azw3.title);
+            string z = azw3.mobi_header.extMeta.id_string[504];//ASIN
+            t = t.Replace("{❕uid}", z);
             ncx = t;
         }
         void CreateCover()
