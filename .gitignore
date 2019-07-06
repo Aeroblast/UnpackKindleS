@@ -5,6 +5,5 @@ temp/
 *.epub
 *.log
 dedrm.bat
-Release
-.vscode
+Released
 

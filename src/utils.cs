@@ -155,13 +155,13 @@ namespace UnpackKindleS
             return r;
         }
 
-        public static void Packup(string outputfullpath)
+        public static void Packup(string src,string outputfullpath)
         {
             if (File.Exists(outputfullpath))
             {
                 File.Delete(outputfullpath);
             }
-            ZipFile.CreateFromDirectory("temp",outputfullpath);
+            ZipFile.CreateFromDirectory(src,outputfullpath);
             Log.log("Saved:"+outputfullpath);
         }
     }

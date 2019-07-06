@@ -1,3 +1,3 @@
 cd /d %~dp0/src
-dotnet run %1 -batch
+dotnet run %1 -dedrm
 pause

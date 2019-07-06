@@ -259,7 +259,7 @@ namespace UnpackKindleS
 
         void CreateNCX()
         {
-            string t = File.ReadAllText("template_ncx.txt");
+            string t = File.ReadAllText("template\\template_ncx.txt");
             string np_temp = "<navPoint id=\"navPoint-{0}\" playOrder=\"{0}\">\n  <navLabel><text>{1}</text></navLabel>\n <content src=\"{2}\" />\n</navPoint>\n";
             string np = "";
             int i = 1;
@@ -282,7 +282,7 @@ namespace UnpackKindleS
             if (azw3.mobi_header.first_res_index + off < azw3.section_count)
                 if (azw3.sections[azw3.mobi_header.first_res_index + off].type == "Image")
                 {
-                    string t = File.ReadAllText("template_cover.txt");
+                    string t = File.ReadAllText("template\\template_cover.txt");
                     cover_name = AddImage(off);
                     cover = t.Replace("{❕image}", cover_name);
                     xhtml_names.Insert(0, "cover.xhtml");
@@ -299,7 +299,7 @@ namespace UnpackKindleS
         {
             if (azw3.resc != null)
             {
-                string t = File.ReadAllText("template_opf.txt");
+                string t = File.ReadAllText("template\\template_opf.txt");
                 XmlDocument manifest = new XmlDocument();
                 XmlElement mani_root = manifest.CreateElement("manifest");
                 manifest.AppendChild(mani_root);

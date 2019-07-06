@@ -10,35 +10,36 @@ namespace UnpackKindleS
     class Program
     {
         static bool dedrm = false;
-        static bool end_of_proc=false;
+        static bool end_of_proc = false;
+        static string temp_path="_temp_";
         static void Main(string[] args)
         {
-            Console.WriteLine("UnpackKindleS Ver."+Version.version);
+            Console.WriteLine("UnpackKindleS Ver." + Version.version);
             if (args.Length < 1)
             {
                 Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
                 return;
             }
-            
+
             foreach (string a in args)
             {
                 if (a.ToLower() == "-dedrm") dedrm = true;
-                if(a.ToLower()=="--just-dump-res")
+                if (a.ToLower() == "--just-dump-res")
                 {
                     DumpHDImage(args);
-                    end_of_proc=true;
+                    end_of_proc = true;
                 }
             }
-            if(!end_of_proc)
-            foreach (string a in args)
-            {
-                switch (a.ToLower())
+            if (!end_of_proc)
+                foreach (string a in args)
                 {
-                    case "-batch": ProcBatch(args); break;
+                    switch (a.ToLower())
+                    {
+                        case "-batch": ProcBatch(args); break;
+                    }
                 }
-            }
-            if(!end_of_proc)ProcPath(args);
-            Log.Save("lastrun.log");
+            if (!end_of_proc) ProcPath(args);
+            Log.Save("..\\lastrun.log");
         }
         static void ProcBatch(string[] args)
         {
@@ -53,7 +54,7 @@ namespace UnpackKindleS
                 try { ProcPath(args2); } catch (Exception e) { Log.log(e.ToString()); }
 
             }
-            end_of_proc=true;
+            end_of_proc = true;
         }
 
         static void ProcPath(string[] args)
@@ -131,64 +132,58 @@ namespace UnpackKindleS
             {
                 string outname = "[" + azw3.mobi_header.extMeta.id_string[100].Split('&')[0] + "] " + azw3.title + ".epub";
                 Epub epub = new Epub(azw3, azw6);
-                if (Directory.Exists("temp")) DeleteDir("temp");
-                Directory.CreateDirectory("temp");
-                epub.Save("temp");
+                if (Directory.Exists(temp_path)) DeleteDir(temp_path);
+                Directory.CreateDirectory(temp_path);
+                epub.Save(temp_path);
                 Log.log(azw3);
                 string output_path;
                 if (args.Length >= 2)
                     if (Directory.Exists(args[1]))
                     {
-                        output_path=Path.Combine(args[1], outname);
+                        output_path = Path.Combine(args[1], outname);
                     }
                 {
                     string outdir = Path.GetDirectoryName(args[0]);
-                    output_path=Path.Combine(outdir, outname);
+                    output_path = Path.Combine(outdir, outname);
                 }
-                Util.Packup(output_path);
-                Log.log("azw3 source:"+azw3_path);
-                if(azw6_path!=null)
-                Log.log("azw6 source:"+azw6_path);
+                Util.Packup(temp_path,output_path);
+                DeleteDir(temp_path);
+                Log.log("azw3 source:" + azw3_path);
+                if (azw6_path != null)
+                    Log.log("azw6 source:" + azw6_path);
             }
             else
             {
-                Console.WriteLine("Cannot find .azw3 file in "+p);
+                Console.WriteLine("Cannot find .azw3 file in " + p);
             }
         }
-        
+
         static void DumpHDImage(string[] args)
         {
             Log.log("Dump azw.res");
-            Log.log("azw6 source:"+args[0]);
-            string outputdir="";
-            if(!File.Exists(args[0])){Log.log("File was not found:"+args[0]);return;}
-            Azw6File azw=new Azw6File(args[0]);
-            if(args.Length>=3)outputdir=args[1];
-            else{outputdir=Path.Combine(Path.GetDirectoryName(args[0]), azw.header.title) ;}
-            if(!CreateDirectory(outputdir)){return;}
-            foreach(var a in azw.image_sections)
+            Log.log("azw6 source:" + args[0]);
+            string outputdir = "";
+            if (!File.Exists(args[0])) { Log.log("File was not found:" + args[0]); return; }
+            Azw6File azw = new Azw6File(args[0]);
+            if (args.Length >= 3) outputdir = args[1];
+            else { outputdir = Path.Combine(Path.GetDirectoryName(args[0]), azw.header.title); }
+            if (!CreateDirectory(outputdir)) { return; }
+            foreach (var a in azw.image_sections)
             {
-                CRES_Section sec=(CRES_Section)azw.sections[a];
-                string filename = Epub.ImageNameHD(a-1, sec);
-                File.WriteAllBytes(Path.Combine(outputdir,filename),sec.img);
-                Log.log("Saved:"+Path.Combine(outputdir,filename));
+                CRES_Section sec = (CRES_Section)azw.sections[a];
+                string filename = Epub.ImageNameHD(a - 1, sec);
+                File.WriteAllBytes(Path.Combine(outputdir, filename), sec.img);
+                Log.log("Saved:" + Path.Combine(outputdir, filename));
             }
-        }
-        static void test()
-        {
-            Azw6File azw6 = new Azw6File(@"sample.azw.res");
-            Azw3File azw3 = new Azw3File(@"sample_nodrm.azw3");
-            Epub mainfile = new Epub(azw3, azw6);
-            mainfile.Save("temp");
         }
 
 
         static void DeDRM(string file)
         {
-            string fn="";
-            if(File.Exists("dedrm.bat")){fn="dedrm.bat";}
-            else if(File.Exists("..\\dedrm.bat")){fn="..\\dedrm.bat";}
-            else{Log.log("Cannot found dedrm.bat"); return;}
+            string fn = "";
+            if (File.Exists("dedrm.bat")) { fn = "dedrm.bat"; }
+            else if (File.Exists("..\\dedrm.bat")) { fn = "..\\dedrm.bat"; }
+            else { Log.log("Cannot found dedrm.bat"); return; }
             Process p = new Process();
             p.StartInfo.FileName = fn;
             p.StartInfo.Arguments = "\"" + file + "\"";
@@ -205,14 +200,14 @@ namespace UnpackKindleS
         {
             try
             {
-            if(!Directory.Exists(path))
-            {
-                string parent=Path.GetDirectoryName(path);
-                if(Directory.Exists(parent))Directory.CreateDirectory(path);
-                else{CreateDirectory(parent);Directory.CreateDirectory(path);} 
+                if (!Directory.Exists(path))
+                {
+                    string parent = Path.GetDirectoryName(path);
+                    if (Directory.Exists(parent)||parent=="") Directory.CreateDirectory(path);
+                    else { CreateDirectory(parent); Directory.CreateDirectory(path); }
+                }
             }
-            }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.log(e.ToString());
                 return false;
