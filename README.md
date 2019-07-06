@@ -2,7 +2,7 @@
 将 XXX_nodrm.azw3(通过DeDRM工具生成) 和 azw.res(Kindle for PC 1.19 or later) 合并为 epub。推荐使用Kindle for PC 1.19~1.24之间的版本。
 
 ## 使用场景
-当你需要将azw.res里的高清资源和azw3合并输出到epub中时。也可以单独转换azw3或解体azw.res。这个项目没有支持其他情况。
+当你需要将azw.res里的高清资源和azw3合并输出到epub中时。也可以单独转换azw3或解体azw.res。这个项目没有支持其他情况。经过配置dedrm.bat可以调用DeDRM程序，达到一键批量转换的效果。
 
 ## 使用方法
 
