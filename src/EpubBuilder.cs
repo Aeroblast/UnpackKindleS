@@ -41,7 +41,15 @@ namespace UnpackKindleS
                 ProcNodes(doc.DocumentElement);
 
             }
-            CreateNCX();
+            try
+            {
+                CreateNCX();
+            }
+            catch (Exception e)
+            {
+                Log.log("Cannot Create NCX.");
+                Log.log(e.ToString());
+            }
             CreateCover();
             CreateOPF();
             {
@@ -316,10 +324,10 @@ namespace UnpackKindleS
                     item.SetAttribute("media-type", "application/xhtml+xml");
                     mani_root.AppendChild(item);
                     i++;
-                    if (i >= xhtmls.Count)                  
-                        break;                  
+                    if (i >= xhtmls.Count)
+                        break;
                 }
-                if(azw3.resc.spine.FirstChild.ChildNodes.Count>xhtmls.Count)Log.log("Warning: Missing Parts. Ignore if this is a book sample.");
+                if (azw3.resc.spine.FirstChild.ChildNodes.Count > xhtmls.Count) Log.log("Warning: Missing Parts. Ignore if this is a book sample.");
                 if (i < xhtmls.Count) { Log.log("Warning: Not all xhtml added to item."); }
 
                 foreach (string imgname in img_names)
@@ -353,20 +361,22 @@ namespace UnpackKindleS
                 XmlDocument meta = new XmlDocument();
                 meta.AppendChild(meta.CreateElement("metadata"));
                 ((XmlElement)meta.FirstChild).SetAttribute("xmlns:dc", "http://purl");
+
                 {
                     XmlElement x = meta.CreateElement("dc:title");
                     x.InnerXml = azw3.title;
-                    string z = azw3.mobi_header.extMeta.id_string[508];
-                    if (z != null)
+                    if (azw3.mobi_header.extMeta.id_string.ContainsKey(508))
+                    {
+                        string z = azw3.mobi_header.extMeta.id_string[508];
                         x.SetAttribute("opf:file-as", z);
+                    }
                     meta.FirstChild.AppendChild(x);
                 }
 
                 {
                     string lang = azw3.mobi_header.extMeta.id_string[524];
                     XmlElement x = meta.CreateElement("dc:language");
-                    if (lang != null)
-                        x.InnerXml = lang;
+                    x.InnerXml = lang;
                     meta.FirstChild.AppendChild(x);
                 }
                 {
@@ -374,10 +384,8 @@ namespace UnpackKindleS
                     x.SetAttribute("id", "ASIN");
                     x.SetAttribute("opf:scheme", "ASIN");
                     string z = azw3.mobi_header.extMeta.id_string[504];
-                    if (z != null)
-                        x.InnerXml = z;
+                    x.InnerXml = z;
                     meta.FirstChild.AppendChild(x);
-
                 }
                 {
                     string[] creatername = azw3.mobi_header.extMeta.id_string[100].Split('&');
@@ -397,24 +405,24 @@ namespace UnpackKindleS
                 }
                 {
                     XmlElement x = meta.CreateElement("dc:publisher");
-                    string fileas = azw3.mobi_header.extMeta.id_string[522];
-                    if (fileas != null)
+                    if (azw3.mobi_header.extMeta.id_string.ContainsKey(522))
+                    {
+                        string fileas = azw3.mobi_header.extMeta.id_string[522];
                         x.SetAttribute("opf:file-as", fileas);
+                    }
                     x.InnerText = azw3.mobi_header.extMeta.id_string[101];
                     meta.FirstChild.AppendChild(x);
                 }
                 {
                     XmlElement x = meta.CreateElement("dc:date");
                     string date = azw3.mobi_header.extMeta.id_string[106];
-                    if (date != null)
-                        x.SetAttribute("opf:event", "publication");
+                    x.SetAttribute("opf:event", "publication");
                     x.InnerText = date;
                     meta.FirstChild.AppendChild(x);
                 }
-
+                if (azw3.mobi_header.extMeta.id_string.ContainsKey(525))
                 {
                     string v = azw3.mobi_header.extMeta.id_string[525];
-                    if (v != null)
                     {
                         XmlElement x = meta.CreateElement("meta");
                         x.SetAttribute("name", "primary-writing-mode");
@@ -437,15 +445,26 @@ namespace UnpackKindleS
                 ((XmlElement)(azw3.resc.spine.FirstChild)).SetAttribute("toc", "ncx"); ;
                 string spine = azw3.resc.spine.OuterXml;
                 t = t.Replace("{❕spine}", spine.Replace("><", ">\n<"));
-                t=t.Replace("{❕version}",Version.version);
+                t = t.Replace("{❕version}", Version.version);
+
                 string guide = "";
                 if (azw3.guide_table != null)
                     foreach (Guide_item g in azw3.guide_table)
                     {
-                        guide += string.Format("<reference type=\"{2}\" title=\"{0}\" href=\"{1}\" />\n", g.ref_name, Path.Combine("Text", xhtml_names[g.num + 1]), g.ref_type);
+                        try
+                        {
+                            guide += string.Format("<reference type=\"{2}\" title=\"{0}\" href=\"{1}\" />\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num+1]), g.ref_type);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.log("Error at Gen guide.");
+                            Log.log(e.ToString());
+                        }
                     }
 
                 t = t.Replace("{❕guide}", guide);
+
+
                 opf = t;
             }
             else

@@ -7,12 +7,12 @@ rd /Q /S bin
 dotnet publish -c release -r win-x64 --self-contained
 
 md ..\bin
-move bin\release\netcoreapp2.2\win-x64\publish ..\bin\lib
+move bin\release\netcoreapp2.2\win-x64\publish ..\bin\app
 
-md ..\bin\lib\template\
-copy template\template_cover.txt ..\bin\lib\template\template_cover.txt
-copy template\template_ncx.txt ..\bin\lib\template\template_ncx.txt
-copy template\template_opf.txt ..\bin\lib\template\template_opf.txt
+md ..\bin\app\template\
+copy template\template_cover.txt ..\bin\app\template\template_cover.txt
+copy template\template_ncx.txt ..\bin\app\template\template_ncx.txt
+copy template\template_opf.txt ..\bin\app\template\template_opf.txt
 
 rd /Q /S bin
 rd /Q /S obj
