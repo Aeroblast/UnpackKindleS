@@ -12,7 +12,7 @@ DeDRM工具(https://github.com/apprenticeharper/DeDRM_tools)是一个可以去�
 
 以下教程根据Windows编写，Mac用户请自求多福（理论上可以搞……）
 
-***强烈推荐：***对于批量一键转换，由于Calibre没有一个插件能处理多个文件输入，因此使用独立的脚本，即DeDRM_tools的Release中的DeDRM_Windows_Application。
+**强烈推荐：** 对于批量一键转换，由于Calibre没有一个插件能处理多个文件输入，因此使用独立的脚本，即DeDRM_tools的Release中的DeDRM_Windows_Application。
 
 根据DeDRM文档和实际试验，需要安装：
 + ActivePython 2.7，运行环境，[官方（居然还得注册）](http://www.activestate.com/activepython/downloads) [百度网盘(随便找的)](https://pan.baidu.com/s/1jGBo9QA)
