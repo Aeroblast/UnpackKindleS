@@ -8,7 +8,9 @@
 
 ### 使用Release版
 
-[到这里下载可执行文件](https://github.com/Aeroblast/UnpackKindleS/releases)
+Release版可执行文件为Windows 64bit，不需要安装任何依赖。[可执行文件](https://github.com/Aeroblast/UnpackKindleS/releases)
+
+如果配置环境遇到困难，可以参阅完善中的[FAQ](https://github.com/Aeroblast/UnpackKindleS/blob/master/FAQ.md)。仍无法解决请提issue。
 
 #### 简单的使用方法
 

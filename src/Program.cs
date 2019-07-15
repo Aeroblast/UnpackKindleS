@@ -20,6 +20,11 @@ namespace UnpackKindleS
                 Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
                 return;
             }
+            if(!Directory.Exists(args[0])&&!File.Exists(args[0]))
+            {
+                Console.WriteLine("Invaild input.\nUsage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
+                return;
+            }
 
             foreach (string a in args)
             {
