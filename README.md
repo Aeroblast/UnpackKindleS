@@ -8,9 +8,9 @@
 
 ### 使用Release版
 
-Release版可执行文件为Windows 64bit，不需要安装任何依赖。[可执行文件](https://github.com/Aeroblast/UnpackKindleS/releases)
+Release版可执行文件为Windows 64bit，不需要安装任何依赖。[【下载可执行文件】](https://github.com/Aeroblast/UnpackKindleS/releases)
 
-如果配置环境遇到困难，可以参阅完善中的[FAQ](https://github.com/Aeroblast/UnpackKindleS/blob/master/FAQ.md)。仍无法解决请提issue。
+如果配置环境遇到困难，可以参阅完善中的[【FAQ】](https://github.com/Aeroblast/UnpackKindleS/blob/master/FAQ.md)。仍无法解决请提issue。
 
 #### 简单的使用方法
 
@@ -18,13 +18,13 @@ Release版可执行文件为Windows 64bit，不需要安装任何依赖。[可�
 
 下载之后，可以在dedrm.bat中配置自己的dedrm路径。
 
-方式1：将azw.res和已经去除DRM的azw3放在同一目录，任选其一或者将文件夹拖到_Tool_Drop_Single.bat上。输出在同目录下。
++ 方式1：将azw.res和已经去除DRM的azw3放在同一目录，任选其一或者将文件夹拖到```_Tool_Drop_Single.bat```上。输出在同目录下。
 
-方式2：配置好dedrm.bat，将My Kindle Content中的文件夹拖到_Tool_Drop_Single_dedrm.bat上。输出在同目录下。
++ 方式2：配置好dedrm.bat，将My Kindle Content中类似```B0XXXXXXXX_EBOK```的文件夹拖到```_Tool_Drop_Single_dedrm.bat```上。输出在同目录下。
 
-方式3：配置好dedrm.bat，将My Kindle Content拖到_Tool_Drop_MyKindleContent.bat上。批量输出在My Kindle Content 里面。
++ 方式3：配置好dedrm.bat，将```My Kindle Content```拖到```_Tool_Drop_MyKindleContent.bat```上。批量输出在My Kindle Content 里面。
 
-提取azw.res中的高清插图：将相应的文件拖到_Tool_Drop_Dump_azwres.bat上。输出到一个名字为该资源书籍标题的文件夹中。
++ 提取azw.res中的高清插图：将相应的文件拖到```_Tool_Drop_Dump_azwres.bat```上。输出到一个名字为该资源书籍标题的文件夹中。
 
 补充说明：Kindle for PC默认存放书籍位置：C:\Users\用户名\Documents\My Kindle Content
 
