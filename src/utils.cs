@@ -164,6 +164,21 @@ namespace UnpackKindleS
             ZipFile.CreateFromDirectory(src,outputfullpath);
             Log.log("Saved:"+outputfullpath);
         }
+
+        public static string FilenameCheck(string s)
+        {
+            return s
+            .Replace('?','？')
+            .Replace('\\','＼')
+            .Replace('/','／')
+            .Replace(':','：')
+            .Replace('*','＊')
+            .Replace('"','＂')
+            .Replace('|','｜')
+            .Replace('<','＜')
+            .Replace('>','＞')
+            ;
+        }
     }
 
     [System.Serializable]

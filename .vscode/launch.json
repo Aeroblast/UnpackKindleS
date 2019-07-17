@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/netcoreapp2.2/UnpackKindleS.dll",
-            "args": ["../samples/sample_iruma.azw.res","--just-dump-res"],
+            "args": ["E:\\UnpackKindleS\\samples\\sample_filename_EBOK"],
             "cwd": "${workspaceFolder}/src",
             "console": "internalConsole",
             "stopAtEntry": false

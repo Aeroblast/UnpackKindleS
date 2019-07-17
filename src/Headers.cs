@@ -31,11 +31,13 @@ namespace UnpackKindleS
                     //Log.log(" " + IdMapping.id_map_strings[id] + ":" + a);
                     if (id_string.ContainsKey(id))
                     {
-                        if(id==100||id==517)
+                        if (id == 100 || id == 517)
                         {
-                            id_string[id]+="&"+a;
+                            id_string[id] += "&" + a;
                         }
-                        Log.log(string.Format("Meta id duplicate:{0}\nPervious:{1}  \nLatter:{2}", IdMapping.id_map_strings[id], id_string[id], a));
+                        else
+                            Log.log(string.Format("Meta id duplicate:{0}\nPervious:{1}  \nLatter:{2}", IdMapping.id_map_strings[id], id_string[id], a));
+
                     }
                     else
                         id_string.Add(id, a);
