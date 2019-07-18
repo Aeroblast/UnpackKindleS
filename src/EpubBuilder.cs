@@ -403,6 +403,7 @@ namespace UnpackKindleS
                     }
 
                 }
+                if (azw3.mobi_header.extMeta.id_string.ContainsKey(101))
                 {
                     XmlElement x = meta.CreateElement("dc:publisher");
                     if (azw3.mobi_header.extMeta.id_string.ContainsKey(522))
@@ -413,6 +414,7 @@ namespace UnpackKindleS
                     x.InnerText = azw3.mobi_header.extMeta.id_string[101];
                     meta.FirstChild.AppendChild(x);
                 }
+                if (azw3.mobi_header.extMeta.id_string.ContainsKey(106))
                 {
                     XmlElement x = meta.CreateElement("dc:date");
                     string date = azw3.mobi_header.extMeta.id_string[106];
@@ -438,6 +440,13 @@ namespace UnpackKindleS
 
                 }
 
+                {
+                    string metaTemplate = "<meta name=\"{0}\" content=\"{1}\" />\n";
+                    string tempstr = "";
+                    if (azw3.mobi_header.extMeta.id_string.ContainsKey(503))
+                    { tempstr += string.Format(metaTemplate, IdMapping.id_map_strings[503], azw3.mobi_header.extMeta.id_string[503]); }
+                    t = t.Replace("{❕othermeta}", tempstr);
+                }
 
 
                 t = t.Replace("{❕meta}", Util.GetInnerXML((XmlElement)meta.FirstChild));
@@ -453,7 +462,7 @@ namespace UnpackKindleS
                     {
                         try
                         {
-                            guide += string.Format("<reference type=\"{2}\" title=\"{0}\" href=\"{1}\" />\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num+1]), g.ref_type);
+                            guide += string.Format("<reference type=\"{2}\" title=\"{0}\" href=\"{1}\" />\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num + 1]), g.ref_type);
                         }
                         catch (Exception e)
                         {
