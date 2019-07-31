@@ -173,6 +173,7 @@ namespace UnpackKindleS
             Azw6File azw = new Azw6File(args[0]);
             if (args.Length >= 3) outputdir = args[1];
             else { outputdir = Path.Combine(Path.GetDirectoryName(args[0]), azw.header.title); }
+            outputdir=Util.FilenameCheck(outputdir);
             if (!CreateDirectory(outputdir)) { return; }
             foreach (var a in azw.image_sections)
             {
