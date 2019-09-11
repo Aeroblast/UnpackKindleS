@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/netcoreapp2.2/UnpackKindleS.dll",
-            "args": ["E:\\UnpackKindleS\\samples\\noname_EBOK"],
+            "args": ["F:\\sample.azw3"],
             "cwd": "${workspaceFolder}/src",
             "console": "internalConsole",
             "stopAtEntry": false

@@ -36,7 +36,7 @@ namespace UnpackKindleS
             foreach (string xhtml in azw3.xhtmls)
             {
                 XmlDocument doc = new XmlDocument();
-                doc.LoadXml(xhtml);
+                doc.LoadXml(Util.ReplaceXmlEntity(xhtml));
                 xhtmls.Add(doc);
                 ProcNodes(doc.DocumentElement);
 
@@ -47,13 +47,13 @@ namespace UnpackKindleS
             }
             catch (Exception e)
             {
-                Log.log("Cannot Create NCX.");
-                Log.log(e.ToString());
+                Log.log("[Error]Cannot Create NCX.");
+                Log.log("[Error]" + e.ToString());
             }
             CreateCover();
             CreateOPF();
             {
-                uint thumb_offset = 0;
+                UInt64 thumb_offset = 0;
                 if (azw3.mobi_header.extMeta.id_value.TryGetValue(202, out thumb_offset))
                 {
                     azw3.sections[azw3.mobi_header.first_res_index + thumb_offset].comment = "Thumb Cover, Ignored";
@@ -134,7 +134,7 @@ namespace UnpackKindleS
             Regex reg_link = new Regex("kindle:flow:([0-9|A-V]+)\\?mime=.*?/(.*)");
             Match m = reg_link.Match(attr.Value);
             if (!m.Success)
-            { Log.log("link unsolved"); return; }
+            { Log.log("[Error]link unsolved"); return; }
             int flowid = (int)Util.DecodeBase32(m.Groups[1].Value);
             string mime = m.Groups[2].Value;
             switch (mime)
@@ -215,7 +215,7 @@ namespace UnpackKindleS
             Regex reg_link = new Regex("kindle:pos:fid:([0-9|A-V]+):off:([0-9|A-V]+)");
 
             Match link = reg_link.Match(attr.Value);
-            if (!link.Success) { Log.log("link unsolved"); return; }
+            if (!link.Success) { Log.log("[Error]link unsolved"); return; }
             int fid = (int)Util.DecodeBase32(link.Groups[1].Value);
             int off = (int)Util.DecodeBase32(link.Groups[2].Value);
 
@@ -236,7 +236,7 @@ namespace UnpackKindleS
         {
             Regex reg_link = new Regex("kindle:embed:([0-9|A-V]+)\\?mime=image/(.*)");
             Match m = reg_link.Match(attr.Value);
-            if (!m.Success) { Log.log("link unsolved"); return; }
+            if (!m.Success) { Log.log("[Error]link unsolved"); return; }
             int resid = (int)Util.DecodeBase32(m.Groups[1].Value) - 1;
             string name = AddImage(resid);
             attr.Value = "../Images/" + name;
@@ -327,8 +327,27 @@ namespace UnpackKindleS
                     if (i >= xhtmls.Count)
                         break;
                 }
-                if (azw3.resc.spine.FirstChild.ChildNodes.Count > xhtmls.Count) Log.log("Warning: Missing Parts. Ignore if this is a book sample.");
-                if (i < xhtmls.Count) { Log.log("Warning: Not all xhtml added to item."); }
+                if (azw3.resc.spine.FirstChild.ChildNodes.Count > xhtmls.Count) Log.log("[Warn] Missing Parts. Ignore if this is a book sample.");
+                if (i < xhtmls.Count)
+                {
+                    Log.log("[Warn]Not all xhtmls are refered in spine.");
+                    for (; i < xhtmls.Count; i++)
+                    {
+                        
+                        XmlElement item = manifest.CreateElement("item");
+                        item.SetAttribute("href", "Text/" + xhtml_names[i]);
+                        item.SetAttribute("id", xhtml_names[i]);
+                        item.SetAttribute("media-type", "application/xhtml+xml");
+                        mani_root.AppendChild(item);
+
+                        XmlElement itemref=azw3.resc.spine.CreateElement("itemref");
+                        itemref.SetAttribute("idref",xhtml_names[i]);
+                        itemref.SetAttribute("linear","yes");
+                        azw3.resc.spine.FirstChild.AppendChild(itemref);
+                        Log.log("[Warn]Added "+xhtml_names[i]+" to spine and item");
+
+                    }
+                }
 
                 foreach (string imgname in img_names)
                 {

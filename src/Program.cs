@@ -11,18 +11,25 @@ namespace UnpackKindleS
     {
         static bool dedrm = false;
         static bool end_of_proc = false;
-        static string temp_path="_temp_";
+        static bool append_log = false;
+        static bool overwrite = false;
+        static bool rename_when_exist = false;
+        static string temp_path = "_temp_";
         static void Main(string[] args)
         {
+            string temp_environment_dir = Environment.CurrentDirectory;
+            if (!Directory.Exists("template"))
+                Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             Console.WriteLine("UnpackKindleS Ver." + Version.version);
             if (args.Length < 1)
             {
                 Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
                 return;
             }
-            if(!Directory.Exists(args[0])&&!File.Exists(args[0]))
+            if (!Directory.Exists(args[0]) && !File.Exists(args[0]))
             {
-                Console.WriteLine("Invaild input.\nUsage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
+                Console.WriteLine("The file or folder does not exist:" + args[0]);
+                Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");
                 return;
             }
 
@@ -34,6 +41,18 @@ namespace UnpackKindleS
                     DumpHDImage(args);
                     end_of_proc = true;
                 }
+                if (a.ToLower() == "--append-log")
+                {
+                    append_log = true;
+                }
+                if(a.ToLower()=="--overwrite")
+                {
+                    overwrite=true;
+                }
+                if(a.ToLower()=="--rename-when-exist")
+                {
+                    rename_when_exist=true;
+                }
             }
             if (!end_of_proc)
                 foreach (string a in args)
@@ -44,7 +63,14 @@ namespace UnpackKindleS
                     }
                 }
             if (!end_of_proc) ProcPath(args);
-            Log.Save("..\\lastrun.log");
+            if (append_log)
+            {
+                Log.Append("..\\lastrun.log");
+            }
+            else
+                Log.Save("..\\lastrun.log");
+
+            Environment.CurrentDirectory = temp_environment_dir;
         }
         static void ProcBatch(string[] args)
         {
@@ -136,7 +162,7 @@ namespace UnpackKindleS
             if (azw3 != null)
             {
                 string outname = "[" + azw3.mobi_header.extMeta.id_string[100].Split('&')[0] + "] " + azw3.title + ".epub";
-                outname=Util.FilenameCheck(outname);
+                outname = Util.FilenameCheck(outname);
                 Epub epub = new Epub(azw3, azw6);
                 if (Directory.Exists(temp_path)) DeleteDir(temp_path);
                 Directory.CreateDirectory(temp_path);
@@ -152,7 +178,65 @@ namespace UnpackKindleS
                     string outdir = Path.GetDirectoryName(args[0]);
                     output_path = Path.Combine(outdir, outname);
                 }
-                Util.Packup(temp_path,output_path);
+                if (File.Exists(output_path))
+                {
+                    Log.log("[Warn]Output already exist.");
+                    if (rename_when_exist)
+                    {
+                        string r_dir = Path.GetDirectoryName(output_path);
+                        string r_name = Path.GetFileNameWithoutExtension(output_path);
+                        string r_path = Path.Combine(r_dir, r_name);
+                        output_path = "";
+                        for (int i = 2; i < 50; i++)
+                        {
+                            string r_test = r_path + "(" + i + ").epub";
+                            if (!File.Exists(r_test))
+                            {
+                                output_path = r_test;
+                                break;
+                            }
+                        }
+                        Log.log("[Warn]Save as...");
+                    }
+                    else if (!overwrite)
+                    {
+                        Console.WriteLine("Output file already exist. N(Abort,Defualt)/y(Overwrite)/r(Rename)?");
+                        string input = Console.ReadLine().ToLower();
+                        if (input == "y")
+                        {
+                            Log.log("[Warn]Old file will be replaced.");
+                        }
+                        else if (input == "r")
+                        {
+                            string r_dir = Path.GetDirectoryName(output_path);
+                            string r_name = Path.GetFileNameWithoutExtension(output_path);
+                            string r_path = Path.Combine(r_dir, r_name);
+                            output_path = "";
+                            for (int i = 2; i < 50; i++)
+                            {
+                                string r_test = r_path + "(" + i + ").epub";
+                                if (!File.Exists(r_test))
+                                {
+                                    output_path = r_test;
+                                    break;
+                                }
+                            }
+                            Log.log("[Warn]Save as...");
+                        }
+                        else
+                        {
+                            Log.log("[Error]Operation aborted. You can use --overwrite or --rename-when-exist to avoid pause.");
+                            output_path = "";
+                        }
+
+                    }
+                    else
+                    {
+                        Log.log("[Warn]Old file will be replaced.");
+                    }
+                }
+                if (output_path != "")
+                    Util.Packup(temp_path, output_path);
                 DeleteDir(temp_path);
                 Log.log("azw3 source:" + azw3_path);
                 if (azw6_path != null)
@@ -173,7 +257,7 @@ namespace UnpackKindleS
             Azw6File azw = new Azw6File(args[0]);
             if (args.Length >= 3) outputdir = args[1];
             else { outputdir = Path.Combine(Path.GetDirectoryName(args[0]), azw.header.title); }
-            outputdir=Util.FilenameCheck(outputdir);
+            outputdir = Util.FilenameCheck(outputdir);
             if (!CreateDirectory(outputdir)) { return; }
             foreach (var a in azw.image_sections)
             {
@@ -210,7 +294,7 @@ namespace UnpackKindleS
                 if (!Directory.Exists(path))
                 {
                     string parent = Path.GetDirectoryName(path);
-                    if (Directory.Exists(parent)||parent=="") Directory.CreateDirectory(path);
+                    if (Directory.Exists(parent) || parent == "") Directory.CreateDirectory(path);
                     else { CreateDirectory(parent); Directory.CreateDirectory(path); }
                 }
             }

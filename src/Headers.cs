@@ -8,13 +8,13 @@ namespace UnpackKindleS
 
     public class ExtMeta
     {
-        public Dictionary<UInt32, UInt32> id_value;
+        public Dictionary<UInt32, UInt64> id_value;
         public Dictionary<UInt32, string> id_string;
         public Dictionary<UInt32, string> id_hex;
 
         public ExtMeta(byte[] ext)
         {
-            id_value = new Dictionary<uint, uint>();
+            id_value = new Dictionary<UInt32, UInt64>();
             id_string = new Dictionary<uint, string>();
             id_hex = new Dictionary<uint, string>();
 
@@ -45,12 +45,13 @@ namespace UnpackKindleS
                 else
                 if (IdMapping.id_map_values.ContainsKey(id))
                 {
-                    UInt32 a = 0;
+                    UInt64 a = 0;
                     switch (size)
                     {
                         case 9: a = Util.GetUInt8(ext, pos + 8); break;
                         case 10: a = Util.GetUInt16(ext, pos + 8); break;
                         case 12: a = Util.GetUInt32(ext, pos + 8); break;
+                        case 16:a = Util.GetUInt64(ext, pos + 8); break;
                         default: Log.log("unexpected size:" + size); break;
                     }
                     // Log.log(" " + IdMapping.id_map_values[id] + ":" + a);

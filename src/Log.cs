@@ -15,7 +15,11 @@ namespace UnpackKindleS
         public static void log(string s)
         {
             t += s + "\r\n";
+            if (s.StartsWith("[Warn")) { Console.ForegroundColor = ConsoleColor.Yellow; }
+            if (s.StartsWith("[Error")) { Console.ForegroundColor = ConsoleColor.Red; }
+            if (s.StartsWith("[Info")) { Console.ForegroundColor = ConsoleColor.Green; }
             Console.WriteLine(s);
+            Console.ForegroundColor = ConsoleColor.White;
         }
         public static void log(Azw3File azw3)
         {
@@ -41,6 +45,10 @@ namespace UnpackKindleS
         public static void Save(string path)
         {
             File.WriteAllText(path, t);
+        }
+        public static void Append(string path)
+        {
+            File.AppendAllText(path, "\r\n\r\n" + t);
         }
     }
 }
