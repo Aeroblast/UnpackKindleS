@@ -1,11 +1,13 @@
 # 什么是azw.res文件？
-根据Kindle for PC (Windows)测试，日亚的轻小说在特定版本下载为两部分（似乎是Kindle for PC 1.19~1.24），位于一个以```_EBOK```结尾的文件夹中，前面是该书的ASIN。一个部分后缀为azw，有DRM，经过DeDRM后后缀将是azw3；另一个部分后缀为azw.res，是一个未加密的文件。这两个部分加起来的大小是商品页面的“文件大小（ファイルサイズ）”所标注的大小。
+根据Kindle for PC (Windows)测试，日亚的轻小说在特定版本下载为两部分，位于一个以```_EBOK```结尾的文件夹中，前面是该书的ASIN。一个部分后缀为azw，有DRM，经过DeDRM后后缀将是azw3；另一个部分后缀为azw.res，是一个未加密的文件。这两个部分加起来的大小是商品页面的“文件大小（ファイルサイズ）”所标注的大小。
 
-azw3将包含书籍的主要信息，包括正文和图片，主流的工具都可以处理这个类型。azw.res提供了额外的高清图片，分辨率一般为高度1600px或者2048px（大约某个时间点以后的部分文库，待确认，可以参考下面的统计情况）。
+以上文件在Kindle for PC 1.19~1.24中找到，更早的版本没有azw.res，更晚的版本虽然存在未加密的azw.res，但是无法解密主要的azw文件。
+
+azw3将包含书籍的主要信息，包括正文和图片，主流的工具都可以处理这个类型。azw.res提供了额外的高清图片，分辨率可以参考下面的统计情况。
 
 附一个Kindle for PC 1.23 Windows [【MEGA盘】](https://mega.nz/#!t1ACHQgR!ZpiiF6G7fSwgYkXsi7_UGm2zYBpmkBDCaRqtLJnt3_E)
 
-高清资源规格部分统计情况(长/短：长边/短边固定为该像素值；高：高度固定为该像素值)：
+高清资源规格十分不完全的统计(长/短：长边/短边固定为该像素值；高：高度固定为该像素值)：
 
 文库 | 发行 | 像素数（观测样本起止时间）
 -|-|-
@@ -27,7 +29,7 @@ GA文庫 | SBクリエイティブ | 长2048
 
 以下教程根据Windows编写，Mac用户请自求多福（理论上可以搞……）
 
-**强烈推荐：** 对于批量一键转换，由于Calibre没有一个插件能处理多个文件输入，因此使用独立的脚本，即DeDRM_tools的Release中的DeDRM_Windows_Application。
+**批量转换：** 对于批量一键转换，由于Calibre没有一个插件能处理多个文件输入，因此使用独立的脚本，即DeDRM_tools的Release中的DeDRM_Windows_Application。
 
 根据DeDRM文档和实际试验，需要安装：
 + ActivePython 2.7，运行环境。[【官方下载（居然还得注册）】](http://www.activestate.com/activepython/downloads) [【百度网盘(随便找的)】](https://pan.baidu.com/s/1jGBo9QA)
