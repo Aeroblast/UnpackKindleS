@@ -45,13 +45,13 @@ namespace UnpackKindleS
                 {
                     append_log = true;
                 }
-                if(a.ToLower()=="--overwrite")
+                if (a.ToLower() == "--overwrite")
                 {
-                    overwrite=true;
+                    overwrite = true;
                 }
-                if(a.ToLower()=="--rename-when-exist")
+                if (a.ToLower() == "--rename-when-exist")
                 {
-                    rename_when_exist=true;
+                    rename_when_exist = true;
                 }
             }
             if (!end_of_proc)
@@ -74,6 +74,7 @@ namespace UnpackKindleS
         }
         static void ProcBatch(string[] args)
         {
+            Log.log("Batch Process:"+args[0]);
             string[] dirs = Directory.GetDirectories(args[0]);
             foreach (string s in dirs)
             {
@@ -121,34 +122,56 @@ namespace UnpackKindleS
                     }
                 }
             }
-            else if (Path.GetExtension(p).ToLower() == ".azw3")
+            else
             {
-                azw3_path = p;
-                dir = Path.GetDirectoryName(p);
-                string[] files = Directory.GetFiles(dir);
-                foreach (string n in files)
+                if (dedrm && Path.GetExtension(p).ToLower() == ".azw")
                 {
-                    if (Path.GetExtension(n) == ".res")
+                    DeDRM(p);
+                    dir = Path.GetDirectoryName(p);
+                    string[] files = Directory.GetFiles(dir);
+                    foreach (string n in files)
                     {
-                        azw6_path = n;
-                        break;
+                        if (Path.GetExtension(n) == ".res")
+                        {
+                            azw6_path = n;
+                        }
+                        if (Path.GetExtension(n).ToLower() == ".azw3")
+                        {
+                            azw3_path = n;
+                        }
+                    }
+                }
+                else
+                if (Path.GetExtension(p).ToLower() == ".azw3")
+                {
+                    azw3_path = p;
+                    dir = Path.GetDirectoryName(p);
+                    string[] files = Directory.GetFiles(dir);
+                    foreach (string n in files)
+                    {
+                        if (Path.GetExtension(n) == ".res")
+                        {
+                            azw6_path = n;
+                            break;
+                        }
+                    }
+                }
+                else if (Path.GetExtension(p).ToLower() == ".res")
+                {
+                    azw6_path = p;
+                    dir = Path.GetDirectoryName(p);
+                    string[] files = Directory.GetFiles(dir);
+                    foreach (string n in files)
+                    {
+                        if (Path.GetExtension(n).ToLower() == ".azw3")
+                        {
+                            azw3_path = n;
+                            break;
+                        }
                     }
                 }
             }
-            else if (Path.GetExtension(p).ToLower() == ".res")
-            {
-                azw6_path = p;
-                dir = Path.GetDirectoryName(p);
-                string[] files = Directory.GetFiles(dir);
-                foreach (string n in files)
-                {
-                    if (Path.GetExtension(n).ToLower() == ".azw3")
-                    {
-                        azw3_path = n;
-                        break;
-                    }
-                }
-            }
+
 
             Azw3File azw3 = null;
             Azw6File azw6 = null;
@@ -169,11 +192,11 @@ namespace UnpackKindleS
                 epub.Save(temp_path);
                 Log.log(azw3);
                 string output_path;
-                if (args.Length >= 2)
-                    if (Directory.Exists(args[1]))
-                    {
-                        output_path = Path.Combine(args[1], outname);
-                    }
+                if (args.Length >= 2 && Directory.Exists(args[1]))
+                {
+                    output_path = Path.Combine(args[1], outname);
+                }
+                else
                 {
                     string outdir = Path.GetDirectoryName(args[0]);
                     output_path = Path.Combine(outdir, outname);

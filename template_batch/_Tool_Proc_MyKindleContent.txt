@@ -1,0 +1,3 @@
+cd /d %~dp0\app
+UnpackKindleS "%USERPROFILE%\Documents\My Kindle Content" %~dp0 -dedrm -batch
+pause

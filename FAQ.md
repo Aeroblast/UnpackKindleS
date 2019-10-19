@@ -14,7 +14,7 @@ azw3将包含书籍的主要信息，包括正文和图片，主流的工具都�
 電撃文庫 | KADOKAWA | 长1600(2016.6)/长2048(2016.12-最新)
 メディアワークス文庫 | KADOKAWA | 长1600(-2015.9)/长2048(2016.10-最新) 
 富士见L文庫 | KADOKAWA | 1600(2016.12)
-富士見ファンタジア文庫 | KADOKAWA | 高1600(-2018.3)
+富士見ファンタジア文庫 | KADOKAWA | 高1600(-2018.3)/长2048(最新)
 ＭＦ文庫Ｊ | KADOKAWA | 高1600(2012.2-2018.2)/长2048(最新)
 角川文庫 | KADOKAWA | 1600(2016.5)/长2048(最新)
 角川スニーカー文庫 | KADOKAWA | 长2048(最新)
@@ -33,15 +33,9 @@ TOブックス | TOブックス | 长1600(最新)
 
 以下教程根据Windows编写，Mac用户请自求多福（理论上可以搞……）
 
-**批量转换：** 对于批量一键转换，由于Calibre没有一个插件能处理多个文件输入，因此使用独立的脚本，即DeDRM_tools的Release中的DeDRM_Windows_Application。
+**批量转换：** 对于批量一键转换，由于Calibre没有一个插件能处理多个文件输入，因此使用独立的版本。
 
-根据DeDRM文档和实际试验，需要安装：
-+ ActivePython 2.7，运行环境。[【官方下载（居然还得注册）】](http://www.activestate.com/activepython/downloads) [【百度网盘(随便找的)】](https://pan.baidu.com/s/1jGBo9QA)
-+ Visual C++ Compiler for Python 2.7 ，安装PyCryoto可能需要，[【官方下载】](https://www.microsoft.com/en-us/download/details.aspx?id=44266)
-+ PyCrypto，需要的模块，[【官方下载】](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
-+ 通过pip安装pylzma ，例：```pip2 install pylzma```
-
-确保安装的如上模块，可以正常使用DeDRM_App，则可以按照自己的安装路径修改dedrm.bat。
+由于官方版DeDRM_Tools应对了其他加密，而这里只处理AZW3，因此可以使用这个[精简版](https://github.com/Aeroblast/AZW3_PC_DeDRM/releases) 
 
 例子：
 ```"C:\Python2\python2.exe" "D:\Apps\DeDRM_App\DeDRM_lib\DeDRM_App.pyw" %1```

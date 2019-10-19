@@ -22,7 +22,7 @@ Release版可执行文件为Windows 64bit，不需要安装任何依赖。[【�
 
 + 方式2：配置好dedrm.bat，将My Kindle Content中类似```B0XXXXXXXX_EBOK```的文件夹拖到```_Tool_Drop_Single_dedrm.bat```上。输出在同目录下。
 
-+ 方式3：配置好dedrm.bat，将```My Kindle Content```拖到```_Tool_Drop_MyKindleContent.bat```上。批量输出在My Kindle Content 里面。
++ 方式3：配置好dedrm.bat，直接运行```_Tool_Proc_MyKindleContent.bat```，自动处理书库所有书，输出在bat同一目录下。
 
 + 提取azw.res中的高清插图：将相应的文件拖到```_Tool_Drop_Dump_azwres.bat```上。输出到一个名字为该资源书籍标题的文件夹中。
 
@@ -42,9 +42,9 @@ Release版可执行文件为Windows 64bit，不需要安装任何依赖。[【�
 
 `` --just-dump-res `` 提取高清插图。
 
-可以参考提供的bat
+可以参考提供的bat。
 
-指定输出目录的功能没怎么测试（懒）
+指定输出目录的功能大概能用。
 
 ### 使用开发版
 
