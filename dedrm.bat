@@ -1,1 +1,1 @@
-"D:\Apps\AZW3_PC_DeDRM\AZW3_PC_DeDRM.exe" %1
+"%~dp0\AZW3_PC_DeDRM.exe" %1

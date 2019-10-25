@@ -224,6 +224,7 @@ namespace UnpackKindleS
                     else if (!overwrite)
                     {
                         Console.WriteLine("Output file already exist. N(Abort,Defualt)/y(Overwrite)/r(Rename)?");
+                        Console.WriteLine("Output path:"+output_path);
                         string input = Console.ReadLine().ToLower();
                         if (input == "y")
                         {
