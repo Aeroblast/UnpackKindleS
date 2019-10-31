@@ -15,7 +15,12 @@ namespace UnpackKindleS
         }
         public string author
         {
-            get { return mobi_header.extMeta.id_string[100]; }
+            get
+            {
+                if (mobi_header.extMeta.id_string.ContainsKey(100))
+                    return mobi_header.extMeta.id_string[100];
+                else return "";
+            }
         }
         public byte[] rawML;
         public MobiHeader mobi_header;
@@ -60,12 +65,12 @@ namespace UnpackKindleS
                 case 0x4448:
                     {
                         byte[] r;
-                        r=GetSectionData(mobi_header.huffman_start_index);
+                        r = GetSectionData(mobi_header.huffman_start_index);
                         HuffmanDecoder _decoder = new HuffmanDecoder(r);
                         sections[mobi_header.huffman_start_index] = new Huffman_Section(r);
                         for (uint i = 0; i < mobi_header.huffman_count - 1; i++)
                         {
-                            r=GetSectionData(mobi_header.huffman_start_index + i + 1);
+                            r = GetSectionData(mobi_header.huffman_start_index + i + 1);
                             _decoder.AddCDIC(r);
                             sections[mobi_header.huffman_start_index + i + 1] = new HuffmanCDIC_Section(r);
                         }
@@ -100,7 +105,7 @@ namespace UnpackKindleS
             List<byte> rawMLraw = new List<byte>();
             for (int i = 0; i < mobi_header.records; i++)
             {
-                sections[i + 1] = new Text_Section(GetSectionData((uint)i+1));
+                sections[i + 1] = new Text_Section(GetSectionData((uint)i + 1));
                 rawMLraw.AddRange(decoder.Decode(Trim(GetSectionData((uint)(i + 1)))));
             }
             rawML = rawMLraw.ToArray();
@@ -143,7 +148,7 @@ namespace UnpackKindleS
             if (mobi_header.skel_index != 0xffffffff)
             {
                 skeleton_table = new List<Skeleton_item>();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.skel_index),"INDX(Skeleton)");
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.skel_index), "INDX(Skeleton)");
                 sections[mobi_header.skel_index] = main_indx;
                 main_indx.ReadTag();
                 for (uint i = 0; i < main_indx.header.any_count; i++)
@@ -163,7 +168,7 @@ namespace UnpackKindleS
             {
                 Hashtable ctoc_dict = new Hashtable();
                 frag_table = new List<Fragment_item>();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.frag_index),"INDX(Fragment)");
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.frag_index), "INDX(Fragment)");
                 sections[mobi_header.frag_index] = main_indx;
                 main_indx.ReadTag();
                 int ctoc_off = 0;
@@ -195,7 +200,7 @@ namespace UnpackKindleS
             {
                 Hashtable ctoc_dict = new Hashtable();
                 guide_table = new List<Guide_item>();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.guide_index),"INDX(Guide)");
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.guide_index), "INDX(Guide)");
                 sections[mobi_header.guide_index] = main_indx;
                 main_indx.ReadTag();
                 int ctoc_off = 0;
@@ -227,7 +232,7 @@ namespace UnpackKindleS
             {
                 ncx_table = new List<NCX_item>();
                 Hashtable ctoc_dict = new Hashtable();
-                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.ncx_index),"INDX(NCX)");
+                INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.ncx_index), "INDX(NCX)");
                 sections[mobi_header.ncx_index] = main_indx;
                 main_indx.ReadTag();
                 int ctoc_off = 0;

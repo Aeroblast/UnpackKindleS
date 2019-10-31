@@ -74,7 +74,7 @@ namespace UnpackKindleS
         }
         static void ProcBatch(string[] args)
         {
-            Log.log("Batch Process:"+args[0]);
+            Log.log("Batch Process:" + args[0]);
             string[] dirs = Directory.GetDirectories(args[0]);
             foreach (string s in dirs)
             {
@@ -184,7 +184,12 @@ namespace UnpackKindleS
                 azw6 = new Azw6File(azw6_path);
             if (azw3 != null)
             {
-                string outname = "[" + azw3.mobi_header.extMeta.id_string[100].Split('&')[0] + "] " + azw3.title + ".epub";
+                string auther = "";
+                if (azw3.mobi_header.extMeta.id_string.ContainsKey(100))
+                {
+                    auther = "[" + azw3.mobi_header.extMeta.id_string[100].Split('&')[0] + "] ";
+                }
+                string outname = auther + azw3.title + ".epub";
                 outname = Util.FilenameCheck(outname);
                 Epub epub = new Epub(azw3, azw6);
                 if (Directory.Exists(temp_path)) DeleteDir(temp_path);
@@ -224,7 +229,7 @@ namespace UnpackKindleS
                     else if (!overwrite)
                     {
                         Console.WriteLine("Output file already exist. N(Abort,Defualt)/y(Overwrite)/r(Rename)?");
-                        Console.WriteLine("Output path:"+output_path);
+                        Console.WriteLine("Output path:" + output_path);
                         string input = Console.ReadLine().ToLower();
                         if (input == "y")
                         {

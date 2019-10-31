@@ -406,6 +406,7 @@ namespace UnpackKindleS
                     x.InnerXml = z;
                     meta.FirstChild.AppendChild(x);
                 }
+                if(azw3.mobi_header.extMeta.id_string.ContainsKey(100))
                 {
                     string[] creatername = azw3.mobi_header.extMeta.id_string[100].Split('&');
                     string[] sortname = new string[0];
