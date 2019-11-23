@@ -325,10 +325,8 @@ namespace UnpackKindleS
                     item.SetAttribute("media-type", "application/xhtml+xml");
                     mani_root.AppendChild(item);
                     i++;
-                    if (i >= xhtmls.Count)
-                        break;
                 }
-                if (azw3.resc.spine.FirstChild.ChildNodes.Count > xhtmls.Count) Log.log("[Warn] Missing Parts. Ignore if this is a book sample.");
+                if (i> xhtmls.Count) Log.log("[Warn] Missing Parts. Ignore if this is a book sample.");
                 if (i < xhtmls.Count)
                 {
                     Log.log("[Warn]Not all xhtmls are refered in spine.");
