@@ -316,6 +316,7 @@ namespace UnpackKindleS
 
                 foreach (XmlNode itemref in azw3.resc.spine.FirstChild.ChildNodes)
                 {
+                    if(itemref.NodeType!=XmlNodeType.Element)continue;
                     itemref.Attributes.RemoveNamedItem("skelid");
                     string idref = itemref.Attributes.GetNamedItem("idref").Value;
                     XmlElement item = manifest.CreateElement("item");
