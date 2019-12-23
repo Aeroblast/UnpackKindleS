@@ -285,8 +285,7 @@ namespace UnpackKindleS
             if (!File.Exists(args[0])) { Log.log("File was not found:" + args[0]); return; }
             Azw6File azw = new Azw6File(args[0]);
             if (args.Length >= 3) outputdir = args[1];
-            else { outputdir = Path.Combine(Path.GetDirectoryName(args[0]), azw.header.title); }
-            outputdir = Util.FilenameCheck(outputdir);
+            else { outputdir = Path.Combine(Path.GetDirectoryName(args[0]),Util.FilenameCheck(azw.header.title)); }
             if (!CreateDirectory(outputdir)) { return; }
             foreach (var a in azw.image_sections)
             {
