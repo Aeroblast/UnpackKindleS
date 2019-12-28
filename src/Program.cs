@@ -19,7 +19,7 @@ namespace UnpackKindleS
         {
             string temp_environment_dir = Environment.CurrentDirectory;
             if (!Directory.Exists("template"))
-                Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                Environment.CurrentDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             Console.WriteLine("UnpackKindleS Ver." + Version.version);
             if (args.Length < 1)
             {

@@ -4,10 +4,11 @@ rd /Q /S bin
 cd src
 rd /Q /S bin
 
-dotnet publish -c release -r win-x64 --self-contained
+dotnet publish -c release -r win10-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true
 
 md ..\bin
-move bin\release\netcoreapp3.0\win-x64\publish ..\bin\app
+del bin\release\netcoreapp3.0\win10-x64\publish\*.pdb
+move bin\release\netcoreapp3.0\win10-x64\publish ..\bin\app
 
 md ..\bin\app\template\
 copy template\template_cover.txt ..\bin\app\template\template_cover.txt
