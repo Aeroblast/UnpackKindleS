@@ -382,7 +382,7 @@ namespace UnpackKindleS
 
                 {
                     XmlElement x = meta.CreateElement("dc:title");
-                    x.InnerXml = azw3.title;
+                    x.InnerText = azw3.title;
                     if (azw3.mobi_header.extMeta.id_string.ContainsKey(508))
                     {
                         string z = azw3.mobi_header.extMeta.id_string[508];
