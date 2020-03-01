@@ -21,6 +21,7 @@ namespace UnpackKindleS
             if (!Directory.Exists("template"))
                 Environment.CurrentDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             Console.WriteLine("UnpackKindleS Ver." + Version.version);
+            Console.WriteLine("https://github.com/Aeroblast/UnpackKindleS");
             if (args.Length < 1)
             {
                 Console.WriteLine("Usage: <xxx_nodrm.azw3 or xxx.azw.res or the directory> [<output_path>] [switches ...]");

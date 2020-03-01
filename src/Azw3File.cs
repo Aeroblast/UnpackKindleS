@@ -90,7 +90,7 @@ namespace UnpackKindleS
                    for (int i = 0; i < trailers; i++)
                    {
                        int num = 0;
-                       for (int j = data.Length - 4; j < data.Length; j++)
+                       for (int j = Math.Max(data.Length - 4, 0); j < data.Length; j++)
                        { if (data[j] > 0x80) num = 0; num = (num << 7) | (data[j] & 0x7f); }
                        data = Util.SubArray(data, 0, data.Length - num);
                    }

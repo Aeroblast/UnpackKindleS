@@ -24,5 +24,5 @@ copy template_batch\_Tool_Drop_Dump_azwres.txt bin\_Tool_Drop_Dump_azwres.bat
 copy template_batch\_Tool_Proc_MyKindleContent.txt bin\_Tool_Proc_MyKindleContent.bat
 copy template_batch\_Tool_Drop_Single.txt bin\_Tool_Drop_Single.bat
 copy template_batch\_Tool_Drop_Single_dedrm.txt bin\_Tool_Drop_Single_dedrm.bat
-
+copy Released\AZW3_PC_DeDRM.exe bin\AZW3_PC_DeDRM.exe
 pause
