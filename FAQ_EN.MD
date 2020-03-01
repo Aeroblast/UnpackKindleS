@@ -9,19 +9,3 @@ Another part has an azw.res extension and it is not encrypted. The azw.res file 
 The total file size of the two parts will be the File Size in the Product details.
 
 Please note that such file could only be found with Kindle for PC 1.19~1.24. Eariler versions have no azw.res files. Later versions cannot process by DeDRM Tools.
-
-# How to use dedrm.bat?
-
-You should have non-DRM azw3 files to use UnpackKinldeS. To get non-DRM azw3 files, you can use [DeDRM Tools](https://github.com/apprenticeharper/DeDRM_tools). 
-
-You can use calibre plugin to get a non-DRM file, then put it in the same folder with azw.res. The .bat is not used in this way.
-
-If you want to merge lots of books at a time, use the standalone version of DeDRM Tools. You may follow the instructions of DeDRM Tools to make sure it works, then write the path to dedrm.bat.
-
-Example:
-```"C:\Python2\python2.exe" "D:\Apps\DeDRM_App\DeDRM_lib\DeDRM_App.pyw" %1```
-
-```%1```is used to pass the azw file.
-
-
-
