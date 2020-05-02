@@ -14,21 +14,23 @@ Release版可执行文件为Windows 64bit，不需要安装任何依赖。[【�
 
 #### 简单的使用方法
 
-使用Release版**不要**下载源码中的bat。
+下载Release版，将包含命令行程序UnpackKindleS.exe及相关的Windows批处理脚本。
 
-下载之后，可以在dedrm.bat中配置自己的dedrm路径。
+Release版中，另外包含一个 [精简版的DeDRM](https://github.com/Aeroblast/AZW3_PC_DeDRM)，因此不需要额外的工具。
 
-+ 方式1：将azw.res和已经去除DRM的azw3放在同一目录，任选其一或者将文件夹拖到```_Tool_Drop_Single.bat```上。输出在同目录下。
-
-+ 方式2：配置好dedrm.bat，将My Kindle Content中类似```B0XXXXXXXX_EBOK```的文件夹拖到```_Tool_Drop_Single_dedrm.bat```上。输出在同目录下。
-
-+ 方式3：配置好dedrm.bat，直接运行```_Tool_Proc_MyKindleContent.bat```，自动处理书库所有书，输出在bat同一目录下。
-
-+ 提取azw.res中的高清插图：将相应的文件拖到```_Tool_Drop_Dump_azwres.bat```上。输出到一个名字为该资源书籍标题的文件夹中。
-
-补充说明：Kindle for PC默认存放书籍位置：C:\Users\用户名\Documents\My Kindle Content
+最简流程：1.在Kindle for PC中下载所有需要导出的书籍；2.运行`_Tool_Proc_MyKindleContent.bat`，将会在同目录下输出EPUB。
 
 转换完成后，会在程序目录输出lastrun.log，可以用于检查输出结果。
+
+最简流程中的`_Tool_Proc_MyKindleContent.bat`针对默认安装，默认存放书籍位置为`C:\Users\用户名\Documents\My Kindle Content`。如果存放在其他位置，使用文本编辑器编辑`_Tool_Proc_MyKindleContent.bat`，将`%USERPROFILE%\Documents\My Kindle Content`修改为相应的路径即可。
+
+其他使用方式：
+
++ 将azw.res和已经去除DRM的azw3放在同一目录，任选其一或者将文件夹拖到```_Tool_Drop_Single.bat```上。在同目录下输出EPUB。
+
++ 将My Kindle Content中类似```B0XXXXXXXX_EBOK```的文件夹拖到```_Tool_Drop_Single_dedrm.bat```上。在同目录下输出EPUB。
+
++ 提取azw.res中的高清插图：将相应的文件拖到```_Tool_Drop_Dump_azwres.bat```上。图片输出到一个名字为该资源书籍标题的文件夹中。
 
 #### 详细说明
 命令行参数格式：
