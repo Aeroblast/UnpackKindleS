@@ -26,18 +26,8 @@ TOブックス | TOブックス | 长1600(最新)
 美少女文庫 | フランス書院 | 短1563/长2233/不确定宽高
 ぷちぱら文庫 | パラダイム | 长1600(-2015)/长1920(2015.7-最新)
 
-# 如何配置dedrm.bat？
-[DeDRM工具](https://github.com/apprenticeharper/DeDRM_tools) 是一个可以去除DRM的工具，有Calibre插件和单独的脚本。
+# 关于DRM
+[DeDRM工具](https://github.com/apprenticeharper/DeDRM_tools) 是一个可以去除DRM的工具，有Calibre插件，旧版本有单独的脚本。
 
-插件版可以方便地转换azw3，如果需要与高清资源合并转换，将二者放入同一文件夹中即可。如果需要批量转换，可以配置dedrm.bat和独立版本DeDRM工具。
+目前已经不需要额外配置，Release将包含[精简版的DeDRM](https://github.com/Aeroblast/AZW3_PC_DeDRM)
 
-以下教程根据Windows编写，Mac用户请自求多福（理论上可以搞……）
-
-**批量转换：** 对于批量一键转换，由于Calibre没有一个插件能处理多个文件输入，因此使用独立的版本。
-
-由于官方版DeDRM_Tools应对了其他加密，而这里只处理AZW3，因此可以使用这个[精简版](https://github.com/Aeroblast/AZW3_PC_DeDRM/releases) 
-
-例子：
-```"C:\Python2\python2.exe" "D:\Apps\DeDRM_App\DeDRM_lib\DeDRM_App.pyw" %1```
-
-```%1```将用于传递参数。
