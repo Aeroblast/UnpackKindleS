@@ -285,22 +285,25 @@ namespace UnpackKindleS
         }
         void CreateCover()
         {
-            string cover;
-            int off = (int)azw3.mobi_header.extMeta.id_value[201];//CoverOffset
-            if (azw3.mobi_header.first_res_index + off < azw3.section_count)
-                if (azw3.sections[azw3.mobi_header.first_res_index + off].type == "Image")
-                {
-                    string t = File.ReadAllText("template\\template_cover.txt");
-                    cover_name = AddImage(off);
-                    cover = t.Replace("{❕image}", cover_name);
-                    xhtml_names.Insert(0, "cover.xhtml");
-                    XmlDocument cover_ = new XmlDocument();
-                    cover_.LoadXml(cover);
-                    xhtmls.Insert(0, cover_);
-                }
-
-            // string kindleurl=azw3.mobi_header.extMeta.id_string[129];
-
+            if (azw3.mobi_header.extMeta.id_value.ContainsKey(201))
+            {
+                string cover;
+                int off = (int)azw3.mobi_header.extMeta.id_value[201];//CoverOffset
+                if (azw3.mobi_header.first_res_index + off < azw3.section_count)
+                    if (azw3.sections[azw3.mobi_header.first_res_index + off].type == "Image")
+                    {
+                        string t = File.ReadAllText("template\\template_cover.txt");
+                        cover_name = AddImage(off);
+                        cover = t.Replace("{❕image}", cover_name);
+                        xhtml_names.Insert(0, "cover.xhtml");
+                        XmlDocument cover_ = new XmlDocument();
+                        cover_.LoadXml(cover);
+                        xhtmls.Insert(0, cover_);
+                    }
+                return;
+            }
+            //if (azw3.mobi_header.extMeta.id_string.ContainsKey(129)){}
+            Log.log("[Warn]No Cover!");
         }
 
         void CreateOPF()
@@ -316,7 +319,7 @@ namespace UnpackKindleS
 
                 foreach (XmlNode itemref in azw3.resc.spine.FirstChild.ChildNodes)
                 {
-                    if(itemref.NodeType!=XmlNodeType.Element)continue;
+                    if (itemref.NodeType != XmlNodeType.Element) continue;
                     itemref.Attributes.RemoveNamedItem("skelid");
                     string idref = itemref.Attributes.GetNamedItem("idref").Value;
                     XmlElement item = manifest.CreateElement("item");
@@ -326,24 +329,24 @@ namespace UnpackKindleS
                     mani_root.AppendChild(item);
                     i++;
                 }
-                if (i> xhtmls.Count) Log.log("[Warn] Missing Parts. Ignore if this is a book sample.");
+                if (i > xhtmls.Count) Log.log("[Warn] Missing Parts. Ignore if this is a book sample.");
                 if (i < xhtmls.Count)
                 {
                     Log.log("[Warn]Not all xhtmls are refered in spine.");
                     for (; i < xhtmls.Count; i++)
                     {
-                        
+
                         XmlElement item = manifest.CreateElement("item");
                         item.SetAttribute("href", "Text/" + xhtml_names[i]);
                         item.SetAttribute("id", xhtml_names[i]);
                         item.SetAttribute("media-type", "application/xhtml+xml");
                         mani_root.AppendChild(item);
 
-                        XmlElement itemref=azw3.resc.spine.CreateElement("itemref");
-                        itemref.SetAttribute("idref",xhtml_names[i]);
-                        itemref.SetAttribute("linear","yes");
+                        XmlElement itemref = azw3.resc.spine.CreateElement("itemref");
+                        itemref.SetAttribute("idref", xhtml_names[i]);
+                        itemref.SetAttribute("linear", "yes");
                         azw3.resc.spine.FirstChild.AppendChild(itemref);
-                        Log.log("[Warn]Added "+xhtml_names[i]+" to spine and item");
+                        Log.log("[Warn]Added " + xhtml_names[i] + " to spine and item");
 
                     }
                 }
@@ -405,7 +408,7 @@ namespace UnpackKindleS
                     x.InnerXml = z;
                     meta.FirstChild.AppendChild(x);
                 }
-                if(azw3.mobi_header.extMeta.id_string.ContainsKey(100))
+                if (azw3.mobi_header.extMeta.id_string.ContainsKey(100))
                 {
                     string[] creatername = azw3.mobi_header.extMeta.id_string[100].Split('&');
                     string[] sortname = new string[0];
