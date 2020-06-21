@@ -373,7 +373,7 @@ namespace UnpackKindleS
                 {
                     XmlElement item = manifest.CreateElement("item");
                     item.SetAttribute("href", "toc.ncx");
-                    item.SetAttribute("id", "ncx");
+                    item.SetAttribute("id", "ncxuks");
                     item.SetAttribute("media-type", "application/x-dtbncx+xml");
                     mani_root.AppendChild(item);
                 }
@@ -473,7 +473,7 @@ namespace UnpackKindleS
 
                 t = t.Replace("{❕meta}", Util.GetInnerXML((XmlElement)meta.FirstChild));
                 //string metas = azw3.resc.metadata.OuterXml;
-                ((XmlElement)(azw3.resc.spine.FirstChild)).SetAttribute("toc", "ncx"); ;
+                ((XmlElement)(azw3.resc.spine.FirstChild)).SetAttribute("toc", "ncxuks"); ;
                 string spine = azw3.resc.spine.OuterXml;
                 t = t.Replace("{❕spine}", spine.Replace("><", ">\n<"));
                 t = t.Replace("{❕version}", Version.version);
