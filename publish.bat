@@ -14,7 +14,7 @@ md ..\bin\app\template\
 copy template\template_cover.txt ..\bin\app\template\template_cover.txt
 copy template\template_ncx.txt ..\bin\app\template\template_ncx.txt
 copy template\template_opf.txt ..\bin\app\template\template_opf.txt
-
+copy Xhtml-Entity-Set.dtd ..\bin\app\Xhtml-Entity-Set.dtd
 rd /Q /S bin
 rd /Q /S obj
 

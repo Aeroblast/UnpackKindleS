@@ -164,26 +164,6 @@ namespace UnpackKindleS
             ZipFile.CreateFromDirectory(src, outputfullpath);
             Log.log("Saved:" + outputfullpath);
         }
-        public static string ReplaceXmlEntity(string xmltext)//如果要用微软的标准XML库，就不能出现未定义的实体引用……我也懒得加什么定义，直接换等效的字符表达。
-        {
-            return xmltext
-.Replace("&nbsp;", "&#160;")
-.Replace("&lt;", "&#60;")
-.Replace("&gt;", "&#62;")
-.Replace("&amp;", "&#38;")
-.Replace("&quot;", "&#34;")
-.Replace("&apos;", "&#39;")
-.Replace("&cent;", "&#162;")
-.Replace("&pound;", "&#163;")
-.Replace("&yen;", "&#165;")
-.Replace("&euro;", "&#8364;")
-.Replace("&sect;", "&#167;")
-.Replace("&copy;", "&#169;")
-.Replace("&reg;", "&#174;")
-.Replace("&trade;", "&#8482;")
-.Replace("&times;", "&#215;")
-.Replace("&divide;", "&#247;");
-        }
 
         public static string FilenameCheck(string s)
         {

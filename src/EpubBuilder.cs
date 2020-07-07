@@ -35,8 +35,7 @@ namespace UnpackKindleS
                 xhtml_names.Add("part" + Util.Number(i) + ".xhtml");
             foreach (string xhtml in azw3.xhtmls)
             {
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(Util.ReplaceXmlEntity(xhtml));
+                var doc = LoadXhtml(xhtml);
                 xhtmls.Add(doc);
                 ProcNodes(doc.DocumentElement);
 
@@ -543,5 +542,26 @@ namespace UnpackKindleS
             return name;
         }
 
+        XmlDocument LoadXhtml(string xhtml)
+        {
+            XmlDocument d = new XmlDocument();
+            using (var rdr = new XmlTextReader(new StringReader(xhtml)))
+            {
+                rdr.DtdProcessing = DtdProcessing.Parse;
+                rdr.XmlResolver = new XhtmlEntityResolver();
+                d.Load(rdr);
+            }
+            return d;
+        }
+
+    }
+
+    class XhtmlEntityResolver : XmlResolver
+    {
+        static Stream entitySet = File.Open("Xhtml-Entity-Set.dtd", FileMode.Open);
+        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
+        {
+            return entitySet;
+        }
     }
 }
