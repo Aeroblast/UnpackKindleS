@@ -541,9 +541,11 @@ namespace UnpackKindleS
             img_names.Add(name);
             return name;
         }
-
+        const string xhtml11doctype = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n";
         XmlDocument LoadXhtml(string xhtml)
         {
+            int htmlstart = xhtml.IndexOf("<html", 0, StringComparison.OrdinalIgnoreCase);
+            xhtml = xhtml11doctype + xhtml.Substring(htmlstart);
             XmlDocument d = new XmlDocument();
             using (var rdr = new XmlTextReader(new StringReader(xhtml)))
             {
@@ -558,10 +560,10 @@ namespace UnpackKindleS
 
     class XhtmlEntityResolver : XmlResolver
     {
-        static Stream entitySet = File.Open("Xhtml-Entity-Set.dtd", FileMode.Open);
+        static byte[] dtd = File.ReadAllBytes("Xhtml-Entity-Set.dtd");
         public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
         {
-            return entitySet;
+            return new MemoryStream(dtd);
         }
     }
 }
