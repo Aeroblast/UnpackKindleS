@@ -31,5 +31,4 @@ TOブックス | TOブックス | 长1600(最新)
 # 关于DRM
 [DeDRM工具](https://github.com/apprenticeharper/DeDRM_tools) 是一个可以去除DRM的工具，有Calibre插件，旧版本有单独的脚本。
 
-目前已经不需要额外配置，Release将包含[精简版的DeDRM](https://github.com/Aeroblast/AZW3_PC_DeDRM)
-
+目前已经不需要额外配置，Release将包含[精简版的DeDRM](https://github.com/Aeroblast/AZW3_PC_DeDRM)。如果遇到类似“非法字符”的提示，请尝试把整个软件存到仅有英文字符的路径下。
