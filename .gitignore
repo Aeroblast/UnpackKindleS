@@ -3,6 +3,8 @@ obj/
 sample*
 temp/
 *.epub
+*.azw3
+*.azw
 *.log
 dedrm.bat
 Released
