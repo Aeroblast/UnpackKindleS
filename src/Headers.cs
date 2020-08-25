@@ -33,7 +33,7 @@ namespace UnpackKindleS
                     {
                         if (id == 100 || id == 517)
                         {
-                            id_string[id] += "&" + a;
+                            id_string[id] += "&" + a.Replace("&", "＆");
                         }
                         else
                             Log.log(string.Format("Meta id duplicate:{0}\nPervious:{1}  \nLatter:{2}", IdMapping.id_map_strings[id], id_string[id], a));
@@ -51,7 +51,7 @@ namespace UnpackKindleS
                         case 9: a = Util.GetUInt8(ext, pos + 8); break;
                         case 10: a = Util.GetUInt16(ext, pos + 8); break;
                         case 12: a = Util.GetUInt32(ext, pos + 8); break;
-                        case 16:a = Util.GetUInt64(ext, pos + 8); break;
+                        case 16: a = Util.GetUInt64(ext, pos + 8); break;
                         default: Log.log("unexpected size:" + size); break;
                     }
                     // Log.log(" " + IdMapping.id_map_values[id] + ":" + a);
