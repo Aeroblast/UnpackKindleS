@@ -26,6 +26,7 @@ namespace UnpackKindleS
 
         string opf;
         string ncx;
+        string nav;
         public Epub(Azw3File azw3, Azw6File azw6 = null)
         {
             this.azw3 = azw3;
@@ -43,10 +44,11 @@ namespace UnpackKindleS
             try
             {
                 CreateNCX();
+                CreateNAV();
             }
             catch (Exception e)
             {
-                Log.log("[Error]Cannot Create NCX.");
+                Log.log("[Error]Cannot Create NCX or NAV.");
                 Log.log("[Error]" + e.ToString());
             }
             CreateCover();
@@ -73,15 +75,14 @@ namespace UnpackKindleS
 
             subdir = Path.Combine(oepbs, "Text");
             Directory.CreateDirectory(subdir);
-            Regex fixer = new Regex("(<!DOCTYPE html.*?)\\[]>");//sigil 
             for (int i = 0; i < xhtml_names.Count; i++)
             {
                 string p = Path.Combine(subdir, xhtml_names[i]);
                 xhtmls[i].Save(p);
-                string[] ss = File.ReadAllLines(p);
-                ss[1] = fixer.Replace(ss[1], "$1>");
-                File.WriteAllLines(p, ss);
-
+                string ss = File.ReadAllText(p);
+                ss = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html>\n"
+                + ss.Substring(ss.IndexOf("<html"));
+                File.WriteAllText(p, ss);
             }
 
             subdir = Path.Combine(oepbs, "Styles");
@@ -99,6 +100,7 @@ namespace UnpackKindleS
             }
 
             File.WriteAllText(Path.Combine(oepbs, "toc.ncx"), ncx);
+            File.WriteAllText(Path.Combine(oepbs, "nav.xhtml"), nav);
             File.WriteAllText(Path.Combine(oepbs, "content.opf"), opf);
 
         }
@@ -282,6 +284,35 @@ namespace UnpackKindleS
             t = t.Replace("{❕uid}", z);
             ncx = t;
         }
+        void CreateNAV()
+        {
+            string t = File.ReadAllText("template\\template_nav.txt");
+            string np_temp = "  <li><a href=\"{1}\">{0}</a></li>\n";
+            string np = "";
+            if (azw3.ncx_table != null)
+                foreach (NCX_item info in azw3.ncx_table)
+                {
+                    np += String.Format(np_temp, info.title, "Text/" + KindlePosToUri(info.fid, info.off));
+                }
+            t = t.Replace("{❕toc}", np);
+            string guide = "";
+            if (azw3.guide_table != null)
+                foreach (Guide_item g in azw3.guide_table)
+                {
+                    try
+                    {
+                        guide += string.Format("    <li><a epub:type=\"{2}\" href=\"{1}\">{0}</a></li>\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num + 1]), g.ref_type);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.log("Error at Gen guide.");
+                        Log.log(e.ToString());
+                    }
+                }
+
+            t = t.Replace("{❕guide}", guide);
+            nav = t;
+        }
         void CreateCover()
         {
             if (azw3.mobi_header.extMeta.id_value.ContainsKey(201))
@@ -357,6 +388,7 @@ namespace UnpackKindleS
                     if (ext == "jpg") ext = "jpeg";
                     XmlElement item = manifest.CreateElement("item");
                     item.SetAttribute("href", "Images/" + imgname);
+                    if (imgname == cover_name) { item.SetAttribute("properties", "cover-image"); }
                     item.SetAttribute("id", Path.GetFileNameWithoutExtension(imgname));
                     item.SetAttribute("media-type", "image/" + ext);
                     mani_root.AppendChild(item);
@@ -376,6 +408,14 @@ namespace UnpackKindleS
                     item.SetAttribute("media-type", "application/x-dtbncx+xml");
                     mani_root.AppendChild(item);
                 }
+                {
+                    XmlElement item = manifest.CreateElement("item");
+                    item.SetAttribute("href", "nav.xhtml");
+                    item.SetAttribute("id", "navuks");
+                    item.SetAttribute("media-type", "application/xhtml+xml");
+                    item.SetAttribute("properties", "nav");
+                    mani_root.AppendChild(item);
+                }
                 t = t.Replace("{❕manifest}", manifest.OuterXml.Replace("><", ">\r\n<"));
 
                 XmlDocument meta = new XmlDocument();
@@ -385,12 +425,18 @@ namespace UnpackKindleS
                 {
                     XmlElement x = meta.CreateElement("dc:title");
                     x.InnerText = azw3.title;
+                    x.SetAttribute("id", "title");
+                    meta.FirstChild.AppendChild(x);
                     if (azw3.mobi_header.extMeta.id_string.ContainsKey(508))
                     {
                         string z = azw3.mobi_header.extMeta.id_string[508];
-                        x.SetAttribute("opf:file-as", z);
+                        XmlElement x2 = meta.CreateElement("meta");
+                        x2.InnerText = z;
+                        x2.SetAttribute("refines", "#title");
+                        x2.SetAttribute("property", "file-as");
+                        meta.FirstChild.AppendChild(x2);
                     }
-                    meta.FirstChild.AppendChild(x);
+
                 }
 
                 {
@@ -417,29 +463,42 @@ namespace UnpackKindleS
                     {
                         XmlElement x = meta.CreateElement("dc:creator");
                         x.InnerText = creatername[l];
+                        x.SetAttribute("id", "creator" + l);
                         meta.FirstChild.AppendChild(x);
 
                         if (l < sortname.Length)
-                            x.SetAttribute("opf:file-as", sortname[l]);
+                        {
+                            XmlElement x2 = meta.CreateElement("meta");
+                            x2.InnerText = sortname[l];
+                            x2.SetAttribute("refines", "#creator" + l);
+                            x2.SetAttribute("property", "file-as");
+                            meta.FirstChild.AppendChild(x2);
+                        }
+
                     }
 
                 }
                 if (azw3.mobi_header.extMeta.id_string.ContainsKey(101))
                 {
                     XmlElement x = meta.CreateElement("dc:publisher");
+                    x.SetAttribute("id", "publisher");
+                    x.InnerText = azw3.mobi_header.extMeta.id_string[101];
+                    meta.FirstChild.AppendChild(x);
                     if (azw3.mobi_header.extMeta.id_string.ContainsKey(522))
                     {
                         string fileas = azw3.mobi_header.extMeta.id_string[522];
-                        x.SetAttribute("opf:file-as", fileas);
+                        XmlElement x2 = meta.CreateElement("meta");
+                        x2.InnerText = fileas;
+                        x2.SetAttribute("refines", "#publisher");
+                        x2.SetAttribute("property", "file-as");
+                        meta.FirstChild.AppendChild(x2);
                     }
-                    x.InnerText = azw3.mobi_header.extMeta.id_string[101];
-                    meta.FirstChild.AppendChild(x);
                 }
                 if (azw3.mobi_header.extMeta.id_string.ContainsKey(106))
                 {
                     XmlElement x = meta.CreateElement("dc:date");
                     string date = azw3.mobi_header.extMeta.id_string[106];
-                    x.SetAttribute("opf:event", "publication");
+                    //x.SetAttribute("opf:event", "publication");
                     x.InnerText = date;
                     meta.FirstChild.AppendChild(x);
                 }
@@ -453,13 +512,7 @@ namespace UnpackKindleS
                         meta.FirstChild.AppendChild(x);
                     }
                 }
-                {
-                    XmlElement x = meta.CreateElement("meta");
-                    x.SetAttribute("name", "cover");
-                    x.SetAttribute("content", Path.GetFileNameWithoutExtension(cover_name));
-                    meta.FirstChild.AppendChild(x);
 
-                }
 
                 {
                     string metaTemplate = "<meta name=\"{0}\" content=\"{1}\" />\n";
@@ -476,24 +529,6 @@ namespace UnpackKindleS
                 string spine = azw3.resc.spine.OuterXml;
                 t = t.Replace("{❕spine}", spine.Replace("><", ">\n<"));
                 t = t.Replace("{❕version}", Version.version);
-
-                string guide = "";
-                if (azw3.guide_table != null)
-                    foreach (Guide_item g in azw3.guide_table)
-                    {
-                        try
-                        {
-                            guide += string.Format("<reference type=\"{2}\" title=\"{0}\" href=\"{1}\" />\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num + 1]), g.ref_type);
-                        }
-                        catch (Exception e)
-                        {
-                            Log.log("Error at Gen guide.");
-                            Log.log(e.ToString());
-                        }
-                    }
-
-                t = t.Replace("{❕guide}", guide);
-
 
                 opf = t;
             }

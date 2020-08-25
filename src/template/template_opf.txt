@@ -1,19 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package version="2.0" unique-identifier="ASIN" xmlns="http://www.idpf.org/2007/opf">
+<package version="3.0" unique-identifier="ASIN" xmlns="http://www.idpf.org/2007/opf">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
 {❕meta}
 <!-- Other meta from azw3
-{❕othermeta}
--->
-<dc:contributor opf:role="bkp">UnpackKindleS ver.{❕version}</dc:contributor>
+{❕othermeta}-->
+    <dc:contributor opf:role="bkp">UnpackKindleS ver.{❕version}</dc:contributor>
   </metadata>
 {❕manifest}
 {❕spine}
-
-<tours>
-</tours>
-<guide>
-{❕guide}
-<reference type="cover" title="Cover" href="Text/cover.xhtml"/>
-</guide>
 </package>

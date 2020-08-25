@@ -7,13 +7,14 @@ rd /Q /S bin
 dotnet publish -c release -r win10-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true
 
 md ..\bin
-del bin\release\netcoreapp3.0\win10-x64\publish\*.pdb
-move bin\release\netcoreapp3.0\win10-x64\publish ..\bin\app
+del bin\release\netcoreapp3.1\win10-x64\publish\*.pdb
+move bin\release\netcoreapp3.1\win10-x64\publish ..\bin\app
 
 md ..\bin\app\template\
 copy template\template_cover.txt ..\bin\app\template\template_cover.txt
 copy template\template_ncx.txt ..\bin\app\template\template_ncx.txt
 copy template\template_opf.txt ..\bin\app\template\template_opf.txt
+copy template\template_nav.txt ..\bin\app\template\template_nav.txt
 copy Xhtml-Entity-Set.dtd ..\bin\app\Xhtml-Entity-Set.dtd
 rd /Q /S bin
 rd /Q /S obj
