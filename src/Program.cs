@@ -14,7 +14,6 @@ namespace UnpackKindleS
         static bool append_log = false;
         static bool overwrite = false;
         static bool rename_when_exist = false;
-        static string temp_path = "_temp_";
         static void Main(string[] args)
         {
             string temp_environment_dir = Environment.CurrentDirectory;
@@ -193,9 +192,6 @@ namespace UnpackKindleS
                 string outname = auther + azw3.title + ".epub";
                 outname = Util.FilenameCheck(outname);
                 Epub epub = new Epub(azw3, azw6);
-                if (Directory.Exists(temp_path)) DeleteDir(temp_path);
-                Directory.CreateDirectory(temp_path);
-                epub.Save(temp_path);
                 Log.log(azw3);
                 string output_path;
                 if (args.Length >= 2 && Directory.Exists(args[1]))
@@ -266,8 +262,7 @@ namespace UnpackKindleS
                     }
                 }
                 if (output_path != "")
-                    Util.Packup(temp_path, output_path);
-                DeleteDir(temp_path);
+                    epub.Save(output_path);
                 Log.log("azw3 source:" + azw3_path);
                 if (azw6_path != null)
                     Log.log("azw6 source:" + azw6_path);
@@ -286,7 +281,7 @@ namespace UnpackKindleS
             if (!File.Exists(args[0])) { Log.log("File was not found:" + args[0]); return; }
             Azw6File azw = new Azw6File(args[0]);
             if (args.Length >= 3) outputdir = args[1];
-            else { outputdir = Path.Combine(Path.GetDirectoryName(args[0]),Util.FilenameCheck(azw.header.title)); }
+            else { outputdir = Path.Combine(Path.GetDirectoryName(args[0]), Util.FilenameCheck(azw.header.title)); }
             if (!CreateDirectory(outputdir)) { return; }
             foreach (var a in azw.image_sections)
             {
@@ -309,12 +304,6 @@ namespace UnpackKindleS
             p.StartInfo.Arguments = "\"" + file + "\"";
             p.Start();
             p.WaitForExit();
-        }
-        static void DeleteDir(string path)
-        {
-            foreach (string p in Directory.GetFiles(path)) File.Delete(p);
-            foreach (string p in Directory.GetDirectories(path)) DeleteDir(p);
-            Directory.Delete(path);
         }
         static bool CreateDirectory(string path)
         {

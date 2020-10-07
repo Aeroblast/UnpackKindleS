@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Xml;
 using System.Collections.Generic;
+using System.IO.Compression;
 namespace UnpackKindleS
 {
 
@@ -62,48 +63,56 @@ namespace UnpackKindleS
             }
 
         }
+        const string container = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">    <rootfiles><rootfile full-path=\"OEBPS/content.opf\" media-type=\"application/oebps-package+xml\"/>    </rootfiles></container>";
         public void Save(string dir)
         {
-            File.WriteAllText(Path.Combine(dir, "mimetype"), "application/epub+zip");
-            string container = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">    <rootfiles><rootfile full-path=\"OEBPS/content.opf\" media-type=\"application/oebps-package+xml\"/>    </rootfiles></container>";
-            Directory.CreateDirectory(Path.Combine(dir, "META-INF"));
-            File.WriteAllText(Path.Combine(dir, "META-INF\\container.xml"), container);
-
-            string oepbs = Path.Combine(dir, "OEBPS");
-            Directory.CreateDirectory(oepbs);
-            string subdir;
-
-            subdir = Path.Combine(oepbs, "Text");
-            Directory.CreateDirectory(subdir);
-            for (int i = 0; i < xhtml_names.Count; i++)
+            using (FileStream fs = new FileStream(dir, FileMode.Create))
+            using (ZipArchive zip = new ZipArchive(fs, ZipArchiveMode.Create))
             {
-                string p = Path.Combine(subdir, xhtml_names[i]);
-                xhtmls[i].Save(p);
-                string ss = File.ReadAllText(p);
-                ss = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html>\n"
-                + ss.Substring(ss.IndexOf("<html"));
-                File.WriteAllText(p, ss);
+                {
+                    var entry = zip.CreateEntry("mimetype", CompressionLevel.NoCompression);
+                    using (StreamWriter writer = new StreamWriter(entry.Open()))
+                        writer.Write("application/epub+zip");
+                }
+                ZipWriteAllText(zip, "META-INF/container.xml", container);
+                for (int i = 0; i < xhtml_names.Count; i++)
+                {
+                    string p = "OEBPS/Text/" + xhtml_names[i];
+                    string ss = xhtmls[i].OuterXml;
+                    ss = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html>\n"
+                    + ss.Substring(ss.IndexOf("<html"));
+                    ZipWriteAllText(zip, p, ss);
+                }
+                for (int i = 0; i < css_names.Count; i++)
+                {
+                    ZipWriteAllText(zip, "OEBPS/Styles/" + css_names[i], csss[i]);
+                }
+                for (int i = 0; i < img_names.Count; i++)
+                {
+                    ZipWriteAllBytes(zip, "OEBPS/Images/" + img_names[i], imgs[i]);
+                }
+                ZipWriteAllText(zip, "OEBPS/toc.ncx", ncx);
+                ZipWriteAllText(zip, "OEBPS/nav.xhtml", nav);
+                ZipWriteAllText(zip, "OEBPS/content.opf", opf);
             }
-
-            subdir = Path.Combine(oepbs, "Styles");
-            Directory.CreateDirectory(subdir);
-            for (int i = 0; i < css_names.Count; i++)
-            {
-                File.WriteAllText(Path.Combine(subdir, css_names[i]), csss[i]);
-            }
-
-            subdir = Path.Combine(oepbs, "Images");
-            Directory.CreateDirectory(subdir);
-            for (int i = 0; i < img_names.Count; i++)
-            {
-                File.WriteAllBytes(Path.Combine(subdir, img_names[i]), imgs[i]);
-            }
-
-            File.WriteAllText(Path.Combine(oepbs, "toc.ncx"), ncx);
-            File.WriteAllText(Path.Combine(oepbs, "nav.xhtml"), nav);
-            File.WriteAllText(Path.Combine(oepbs, "content.opf"), opf);
-
         }
+        void ZipWriteAllText(ZipArchive zip, string path, string text)
+        {
+            var entry = zip.CreateEntry(path);
+            using (StreamWriter writer = new StreamWriter(entry.Open()))
+            {
+                writer.Write(text);
+            }
+        }
+        void ZipWriteAllBytes(ZipArchive zip, string path, byte[] data)
+        {
+            var entry = zip.CreateEntry(path);
+            using (Stream stream = entry.Open())
+            {
+                stream.Write(data, 0, data.Length);
+            }
+        }
+
         void ProcNodes(XmlNode node)
         {
             if (node.Attributes != null)
@@ -448,10 +457,14 @@ namespace UnpackKindleS
                 {
                     XmlElement x = meta.CreateElement("dc:identifier");
                     x.SetAttribute("id", "ASIN");
-                    x.SetAttribute("opf:scheme", "ASIN");
+                    //x.SetAttribute("opf:scheme", "ASIN");
                     string z = azw3.mobi_header.extMeta.id_string[504];
                     x.InnerXml = z;
                     meta.FirstChild.AppendChild(x);
+                    XmlElement xd = meta.CreateElement("meta");
+                    xd.SetAttribute("property", "dcterms:modified");
+                    xd.InnerText = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssZ");
+                    meta.FirstChild.AppendChild(xd);
                 }
                 if (azw3.mobi_header.extMeta.id_string.ContainsKey(100))
                 {

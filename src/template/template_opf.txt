@@ -4,7 +4,8 @@
 {❕meta}
 <!-- Other meta from azw3
 {❕othermeta}-->
-    <dc:contributor opf:role="bkp">UnpackKindleS ver.{❕version}</dc:contributor>
+    <dc:contributor id="tool">UnpackKindleS ver.{❕version}</dc:contributor>
+    <meta refines="#tool" property="role" scheme="marc:relators">bkp</meta>
   </metadata>
 {❕manifest}
 {❕spine}
