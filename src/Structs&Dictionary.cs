@@ -44,7 +44,7 @@ namespace UnpackKindleS
         }
         protected AzwFile(string path)
         {
-                        raw_data = File.ReadAllBytes(path);
+            raw_data = File.ReadAllBytes(path);
             GetSectionInfo();
 
         }
@@ -105,10 +105,10 @@ namespace UnpackKindleS
         public int num;
         public Guide_item(string _ref_type, string _ref_name, int no) { ref_type = _ref_type; ref_name = _ref_name; num = no; }
     }
-    public class NCX_item
+    public class IndexInfo_item
     {
         public string title, name;
-        public int fid, off, position, length;
+        public int fid, off, position, length, level, parent = -1, children_start = -1, children_end = -1;
     }
     public class IdMapping
     {

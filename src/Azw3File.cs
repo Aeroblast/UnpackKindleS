@@ -141,7 +141,7 @@ namespace UnpackKindleS
         public List<Skeleton_item> skeleton_table;
         public List<Fragment_item> frag_table;
         public List<Guide_item> guide_table;
-        public List<NCX_item> ncx_table;
+        public List<IndexInfo_item> index_info_table;
         void ProcessIndex()
         {
 
@@ -230,7 +230,7 @@ namespace UnpackKindleS
             }
             if (mobi_header.ncx_index != 0xffffffff)
             {
-                ncx_table = new List<NCX_item>();
+                index_info_table = new List<IndexInfo_item>();
                 Hashtable ctoc_dict = new Hashtable();
                 INDX_Section_Main main_indx = new INDX_Section_Main(GetSectionData(mobi_header.ncx_index), "INDX(NCX)");
                 sections[mobi_header.ncx_index] = main_indx;
@@ -255,19 +255,42 @@ namespace UnpackKindleS
                     ext_indx.ReadTagMap();
                     for (int j = 0; j < ext_indx.tagmaps.Length; j++)
                     {
-                        NCX_item item = new NCX_item();
+                        IndexInfo_item item = new IndexInfo_item();
                         item.name = ext_indx.texts[j];
                         foreach (var k in ext_indx.tagmaps[j])
                         {
                             List<int> a = (List<int>)((DictionaryEntry)k).Value;
-                            item.fid = a[4];
-                            item.off = a[5];
                             item.position = a[0];
                             item.length = a[1];
                             item.title = (string)ctoc_dict[a[2]];
+                            item.level = a[3];
+                            if (item.level > 0)
+                            {
+                                item.parent = a[4];
+                                item.fid = a[5];
+                                item.off = a[6];
+                            }
+                            else
+                            {
+                                switch (a.Count)
+                                {
+                                    case 6:
+                                        item.fid = a[4];
+                                        item.off = a[5];
+                                        break;
+                                    case 8:
+                                        item.children_start = a[4];
+                                        item.children_end = a[5];
+                                        item.fid = a[6];
+                                        item.off = a[7];
+                                        break;
+                                    default: throw new Exception("Unhandled Error at INDX");
+                                }
+                            }
                             break;
                         }
-                        ncx_table.Add(item);
+                        index_info_table.Add(item);
+                        Console.WriteLine($"{item.name} {item.fid} {item.off} {item.title}");
                     }
                 }
             }

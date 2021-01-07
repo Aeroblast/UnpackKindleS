@@ -44,8 +44,7 @@ namespace UnpackKindleS
             }
             try
             {
-                CreateNCX();
-                CreateNAV();
+                CreateIndexDoc();
             }
             catch (Exception e)
             {
@@ -118,6 +117,7 @@ namespace UnpackKindleS
             if (node.Attributes != null)
             {
                 node.Attributes.RemoveNamedItem("aid");
+                node.Attributes.RemoveNamedItem("amzn-src-id");
                 foreach (XmlAttribute attr in node.Attributes)
                 {
                     if (attr.Value.IndexOf("kindle:") == 0)
@@ -233,7 +233,7 @@ namespace UnpackKindleS
         }
         string KindlePosToUri(int fid, int off)//务必在插入封面前调用
         {
-            Regex reg_html_id = new Regex("<.*? id=\"(.*?)\".*?>");
+            Regex reg_html_id = new Regex("^<.*? id=\"(.*?)\".*?>");
             Fragment_item frag = azw3.frag_table[fid];
             byte[] t = Util.SubArray(azw3.rawML, frag.pos_in_raw + off, frag.length - off);
             string s = Encoding.UTF8.GetString(t);
@@ -275,52 +275,106 @@ namespace UnpackKindleS
             return r;
         }
 
-        void CreateNCX()
+        private class IndexNode
         {
-            string t = File.ReadAllText("template\\template_ncx.txt");
-            string np_temp = "<navPoint id=\"navPoint-{0}\" playOrder=\"{0}\">\n  <navLabel><text>{1}</text></navLabel>\n <content src=\"{2}\" />\n</navPoint>\n";
-            string np = "";
-            int i = 1;
-            if (azw3.ncx_table != null)
-                foreach (NCX_item info in azw3.ncx_table)
-                {
-                    np += String.Format(np_temp, i, info.title, "Text/" + KindlePosToUri(info.fid, info.off));
-                    i++;
-                }
-            t = t.Replace("{❕navMap}", np);
-            t = t.Replace("{❕Title}", azw3.title);
-            string z = azw3.mobi_header.extMeta.id_string[504];//ASIN
-            t = t.Replace("{❕uid}", z);
-            ncx = t;
-        }
-        void CreateNAV()
-        {
-            string t = File.ReadAllText("template\\template_nav.txt");
-            string np_temp = "  <li><a href=\"{1}\">{0}</a></li>\n";
-            string np = "";
-            if (azw3.ncx_table != null)
-                foreach (NCX_item info in azw3.ncx_table)
-                {
-                    np += String.Format(np_temp, info.title, "Text/" + KindlePosToUri(info.fid, info.off));
-                }
-            t = t.Replace("{❕toc}", np);
-            string guide = "";
-            if (azw3.guide_table != null)
-                foreach (Guide_item g in azw3.guide_table)
-                {
-                    try
-                    {
-                        guide += string.Format("    <li><a epub:type=\"{2}\" href=\"{1}\">{0}</a></li>\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num + 1]), g.ref_type);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.log("Error at Gen guide.");
-                        Log.log(e.ToString());
-                    }
-                }
+            public string href, title;
+            public List<IndexNode> children;
+            public IndexNode parent;
+            public IndexNode(string href, string title)
+            {
+                this.href = href;
+                this.title = title;
+            }
 
-            t = t.Replace("{❕guide}", guide);
-            nav = t;
+        }
+        int playOrder = 1;
+        void CreateIndexDoc_Helper(IndexNode node, StringBuilder temp_epub3, StringBuilder temp_epub2, int level = 0)
+        {
+            string tabs = new String('\t', level);
+
+            temp_epub3.Append("\n" + tabs + $"<ol>\n");
+            foreach (var n in node.children)
+            {
+
+                temp_epub3.Append(tabs + $"<li><a href=\"{n.href}\">{n.title}</a>");
+
+                temp_epub2.Append(tabs + $"<navPoint id=\"navPoint-{playOrder}\" playOrder=\"{playOrder}\">\n");
+                temp_epub2.Append(tabs + $"\t<navLabel><text>{n.title}</text></navLabel>\n");
+                temp_epub2.Append(tabs + $"\t<content src=\"{n.href}\" />\n");
+
+                playOrder++;
+
+                if (n.children != null)
+                {
+                    CreateIndexDoc_Helper(n, temp_epub3, temp_epub2, level + 1);
+                }
+                temp_epub3.Append("</li>\n");
+                temp_epub2.Append(tabs + "</navPoint>\n");
+            }
+            temp_epub3.Append(tabs + $"</ol>\n");
+        }
+        void CreateIndexDoc()
+        {
+            List<IndexNode> allEntries = new List<IndexNode>();
+            IndexNode root = new IndexNode("", "");
+            root.children = new List<IndexNode>();
+            int maxLevel = 0;
+            if (azw3.index_info_table != null)
+                for (int i = 0; i < azw3.index_info_table.Count; i++)
+                {
+                    IndexInfo_item info = azw3.index_info_table[i];
+                    var entry = new IndexNode("Text/" + KindlePosToUri(info.fid, info.off), info.title);
+                    allEntries.Add(entry);
+                    if (info.children_start != -1) { entry.children = new List<IndexNode>(); }
+                    if (info.level > 0)
+                    {
+                        entry.parent = allEntries[info.parent];
+                        entry.parent.children.Add(entry);
+
+                        //assert
+                        var _item = azw3.index_info_table[info.parent];
+                        if (_item.children_start > i || _item.children_end < i) { throw new Exception("Index Error"); }
+                    }
+                    else
+                    {
+                        root.children.Add(entry);
+                    }
+                    if (info.level > maxLevel) maxLevel = info.level;
+                }
+            StringBuilder temp_epub3 = new StringBuilder(), temp_epub2 = new StringBuilder();
+            CreateIndexDoc_Helper(root, temp_epub3, temp_epub2);
+            //Create NAV
+            {
+                string t = File.ReadAllText("template\\template_nav.txt");
+                t = t.Replace("{❕toc}", temp_epub3.ToString());
+                string guide = "";
+                if (azw3.guide_table != null)
+                    foreach (Guide_item g in azw3.guide_table)
+                    {
+                        try
+                        {
+                            guide += string.Format("    <li><a epub:type=\"{2}\" href=\"{1}\">{0}</a></li>\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num + 1]), g.ref_type);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.log("Error at Gen guide.");
+                            Log.log(e.ToString());
+                        }
+                    }
+
+                t = t.Replace("{❕guide}", guide);
+                nav = t;
+            }
+            {
+                string t = File.ReadAllText("template\\template_ncx.txt");
+
+                t = t.Replace("{❕navMap}", temp_epub2.ToString());
+                t = t.Replace("{❕Title}", azw3.title);
+                string z = azw3.mobi_header.extMeta.id_string[504];//ASIN
+                t = t.Replace("{❕uid}", z);
+                t = t.Replace("{❕depth}", maxLevel + 1 + "");
+                ncx = t;
+            }
         }
         void CreateCover()
         {

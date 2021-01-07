@@ -9,9 +9,7 @@
 
 <nav epub:type="toc" id="toc">
 <h1>Navigation</h1>
-<ol>
 {❕toc}
-</ol>
 </nav>
 
 <nav epub:type="landmarks" id="guide">
