@@ -15,7 +15,7 @@
 <nav epub:type="landmarks" id="guide">
 <h1>Guide</h1>
 <ol>
-	<li><a epub:type="cover" href="Text/cover.xhtml">Cover</a></li>
+	<li><a epub:type="cover" href="{❕cover}">Cover</a></li>
 {❕guide}
 </ol>
 </nav>

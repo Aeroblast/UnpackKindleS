@@ -4,6 +4,8 @@ using System.IO.Compression;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Xml;
+using System.Drawing;
+using System.Drawing.Imaging;
 namespace UnpackKindleS
 {
 
@@ -168,6 +170,14 @@ namespace UnpackKindleS
             .Replace('<', '＜')
             .Replace('>', '＞')
             ;
+        }
+
+        public static (int, int) GetImageSize(byte[] data)
+        {
+            using (var img = Image.FromStream(new MemoryStream(data)))
+            {
+                return (img.Width, img.Height);
+            }
         }
     }
 

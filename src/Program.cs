@@ -14,6 +14,7 @@ namespace UnpackKindleS
         static bool append_log = false;
         static bool overwrite = false;
         static bool rename_when_exist = false;
+        static bool rename_xhtml_with_id = false;
         static void Main(string[] args)
         {
             string temp_environment_dir = Environment.CurrentDirectory;
@@ -52,6 +53,10 @@ namespace UnpackKindleS
                 if (a.ToLower() == "--rename-when-exist")
                 {
                     rename_when_exist = true;
+                }
+                if (a.ToLower() == "--rename-xhtml-with-id")
+                {
+                    rename_xhtml_with_id = true;
                 }
             }
             if (!end_of_proc)
@@ -191,7 +196,7 @@ namespace UnpackKindleS
                 }
                 string outname = auther + azw3.title + ".epub";
                 outname = Util.FilenameCheck(outname);
-                Epub epub = new Epub(azw3, azw6);
+                Epub epub = new Epub(azw3, azw6, rename_xhtml_with_id);
                 Log.log(azw3);
                 string output_path;
                 if (args.Length >= 2 && Directory.Exists(args[1]))

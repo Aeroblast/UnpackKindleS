@@ -13,6 +13,8 @@ namespace UnpackKindleS
         Azw3File azw3;
         Azw6File azw6;
 
+        public bool renameXhtmlWithId = true;
+
 
         List<XmlDocument> xhtmls = new List<XmlDocument>();
         List<string> xhtml_names = new List<string>();
@@ -28,19 +30,35 @@ namespace UnpackKindleS
         string opf;
         string ncx;
         string nav;
-        public Epub(Azw3File azw3, Azw6File azw6 = null)
+        public Epub(Azw3File azw3, Azw6File azw6, bool rename_xhtml_with_id)
         {
             this.azw3 = azw3;
             this.azw6 = azw6;
+            renameXhtmlWithId = rename_xhtml_with_id;
             azw3.flowProcessLog = new string[azw3.flows.Count];
             for (int i = 0; i < azw3.xhtmls.Count; i++)
                 xhtml_names.Add("part" + Util.Number(i) + ".xhtml");
+            if (renameXhtmlWithId)
+            {
+                Log.log("[Info]Rename xhtmls with id.");
+                int i = 0, offset = 0;
+                if (NeedCreateCoverDocument())
+                {
+                    i = 1; offset = -1;
+                }
+                var itemrefs = azw3.resc.spine.FirstChild.ChildNodes;
+                for (; (i + offset < xhtml_names.Count) && (i < itemrefs.Count); i++)
+                {
+                    var id = itemrefs[i].Attributes.GetNamedItem("idref").Value;
+                    xhtml_names[i + offset] = id + ".xhtml";
+                }
+
+            }
             foreach (string xhtml in azw3.xhtmls)
             {
                 var doc = LoadXhtml(xhtml);
                 xhtmls.Add(doc);
                 ProcNodes(doc.DocumentElement);
-
             }
             try
             {
@@ -51,7 +69,7 @@ namespace UnpackKindleS
                 Log.log("[Error]Cannot Create NCX or NAV.");
                 Log.log("[Error]" + e.ToString());
             }
-            CreateCover();
+            SetCover();
             CreateOPF();
             {
                 UInt64 thumb_offset = 0;
@@ -77,7 +95,15 @@ namespace UnpackKindleS
                 for (int i = 0; i < xhtml_names.Count; i++)
                 {
                     string p = "OEBPS/Text/" + xhtml_names[i];
-                    string ss = xhtmls[i].OuterXml;
+                    string ss;
+                    var xmlSettings = new XmlWriterSettings { Indent = true, NewLineChars = "\n" };
+                    using (var stringWriter = new StringWriter())
+                    using (var xmlTextWriter = XmlWriter.Create(stringWriter, xmlSettings))
+                    {
+                        xhtmls[i].WriteTo(xmlTextWriter);
+                        xmlTextWriter.Flush();
+                        ss = stringWriter.GetStringBuilder().ToString();
+                    }
                     ss = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html>\n"
                     + ss.Substring(ss.IndexOf("<html"));
                     ZipWriteAllText(zip, p, ss);
@@ -258,6 +284,7 @@ namespace UnpackKindleS
         {
             string r = text;
             Regex reg_link = new Regex("url\\(kindle:flow:([0-9|A-V]+)\\?mime=text/css\\)");
+            Regex reg_link2 = new Regex("url\\(kindle:embed:([0-9|A-V]+)\\)");
             foreach (Match m in reg_link.Matches(text))
             {
                 int flowid = (int)Util.DecodeBase32(m.Groups[1].Value);
@@ -270,6 +297,14 @@ namespace UnpackKindleS
                     css_names.Add(name);
                     azw3.flowProcessLog[flowid - 1] = name;
                 }
+                r = r.Replace(m.Groups[0].Value, "url(" + name + ")");
+            }
+            foreach (Match m in reg_link2.Matches(text))
+            {
+                int section_offset = (int)Util.DecodeBase32(m.Groups[1].Value);
+
+                //to do: font 
+                string name = "embed" + Util.Number(section_offset) + ".otf";
                 r = r.Replace(m.Groups[0].Value, "url(" + name + ")");
             }
             return r;
@@ -363,6 +398,7 @@ namespace UnpackKindleS
                     }
 
                 t = t.Replace("{❕guide}", guide);
+                t = t.Replace("{❕cover}", "Text/" + xhtml_names[0]);
                 nav = t;
             }
             {
@@ -376,7 +412,7 @@ namespace UnpackKindleS
                 ncx = t;
             }
         }
-        void CreateCover()
+        void SetCover()//等KindlePosToUri不再使用后 关系到xhtml相关变量
         {
             if (azw3.mobi_header.extMeta.id_value.ContainsKey(201))
             {
@@ -385,18 +421,39 @@ namespace UnpackKindleS
                 if (azw3.mobi_header.first_res_index + off < azw3.section_count)
                     if (azw3.sections[azw3.mobi_header.first_res_index + off].type == "Image")
                     {
-                        string t = File.ReadAllText("template\\template_cover.txt");
                         cover_name = AddImage(off);
-                        cover = t.Replace("{❕image}", cover_name);
-                        xhtml_names.Insert(0, "cover.xhtml");
-                        XmlDocument cover_ = new XmlDocument();
-                        cover_.LoadXml(cover);
-                        xhtmls.Insert(0, cover_);
+
+                        if (NeedCreateCoverDocument())
+                        {
+                            Log.log("[Info]Adding a cover document.");
+
+                            string t = File.ReadAllText("template\\template_cover.txt");
+                            var (w, h) = Util.GetImageSize(imgs[img_names.IndexOf(cover_name)]);
+                            cover = t.Replace("{❕image}", cover_name).Replace("{❕w}", w.ToString()).Replace("{❕h}", h.ToString());
+
+                            string coverDocumentName = "cover.xhtml";
+                            if (renameXhtmlWithId)
+                            {
+                                var id = azw3.resc.spine.FirstChild.ChildNodes[0].Attributes.GetNamedItem("idref").Value;
+                                coverDocumentName = id + ".xhtml";
+                            }
+                            xhtml_names.Insert(0, coverDocumentName);
+                            XmlDocument cover_ = new XmlDocument();
+                            cover_.LoadXml(cover);
+                            xhtmls.Insert(0, cover_);
+                        }
+
                     }
                 return;
             }
             //if (azw3.mobi_header.extMeta.id_string.ContainsKey(129)){}
             Log.log("[Warn]No Cover!");
+        }
+
+        bool NeedCreateCoverDocument()
+        {
+            if (azw3.resc.spine.FirstChild.ChildNodes.Count == xhtml_names.Count) return false;
+            return true;
         }
 
         void CreateOPF()
@@ -407,6 +464,7 @@ namespace UnpackKindleS
                 XmlDocument manifest = new XmlDocument();
                 XmlElement mani_root = manifest.CreateElement("manifest");
                 manifest.AppendChild(mani_root);
+                string packagePrefix = "";
 
                 int i = 0;
 
@@ -419,6 +477,10 @@ namespace UnpackKindleS
                     item.SetAttribute("href", "Text/" + xhtml_names[i]);
                     item.SetAttribute("id", idref);
                     item.SetAttribute("media-type", "application/xhtml+xml");
+                    if (ContainsSVG(xhtmls[i]))
+                    {
+                        item.SetAttribute("properties", "svg");
+                    }
                     mani_root.AppendChild(item);
                     i++;
                 }
@@ -433,6 +495,10 @@ namespace UnpackKindleS
                         item.SetAttribute("href", "Text/" + xhtml_names[i]);
                         item.SetAttribute("id", xhtml_names[i]);
                         item.SetAttribute("media-type", "application/xhtml+xml");
+                        if (ContainsSVG(xhtmls[i]))
+                        {
+                            item.SetAttribute("properties", "svg");
+                        }
                         mani_root.AppendChild(item);
 
                         XmlElement itemref = azw3.resc.spine.CreateElement("itemref");
@@ -569,16 +635,56 @@ namespace UnpackKindleS
                     x.InnerText = date;
                     meta.FirstChild.AppendChild(x);
                 }
-                if (azw3.mobi_header.extMeta.id_string.ContainsKey(525))
+
+
+                //fixed layout
+                if (azw3.mobi_header.extMeta.id_string.ContainsKey(122))
                 {
-                    string v = azw3.mobi_header.extMeta.id_string[525];
+                    string v = azw3.mobi_header.extMeta.id_string[122];
+                    if (v == "true")
                     {
-                        XmlElement x = meta.CreateElement("meta");
-                        x.SetAttribute("name", "primary-writing-mode");
-                        x.SetAttribute("content", v);
+                        packagePrefix = "\n prefix=\"rendition: http://www.idpf.org/vocab/rendition/#\"";
+                        //<meta property="rendition:layout">pre-paginated</meta>
+                        //<meta property="rendition:orientation">auto</meta>
+                        //<meta property="rendition:spread">landscape</meta>
+                        XmlElement x;
+                        x = meta.CreateElement("meta");
+                        x.SetAttribute("property", "rendition:layout");
+                        x.InnerText = "pre-paginated";
                         meta.FirstChild.AppendChild(x);
+                        x = meta.CreateElement("meta");
+                        x.SetAttribute("property", "rendition:orientation");
+                        x.InnerText = "auto";
+                        meta.FirstChild.AppendChild(x);
+                        x = meta.CreateElement("meta");
+                        x.SetAttribute("property", "rendition:spread");
+                        x.InnerText = "landscape";
+                        meta.FirstChild.AppendChild(x);
+
                     }
                 }
+
+                //normal meta
+                var normalMetas = new (uint, string)[] {
+                     ( 525, "primary-writing-mode" ),
+                     ( 123, "book-type" ),
+                     ( 124, "orientation-lock"),
+                     ( 126, "original-resolution" )
+                  };
+                foreach (var nm in normalMetas)
+                {
+                    if (azw3.mobi_header.extMeta.id_string.ContainsKey(nm.Item1))
+                    {
+                        string v = azw3.mobi_header.extMeta.id_string[nm.Item1];
+                        {
+                            XmlElement x = meta.CreateElement("meta");
+                            x.SetAttribute("name", nm.Item2);
+                            x.SetAttribute("content", v);
+                            meta.FirstChild.AppendChild(x);
+                        }
+                    }
+                }
+
 
 
                 {
@@ -589,7 +695,7 @@ namespace UnpackKindleS
                     t = t.Replace("{❕othermeta}", tempstr);
                 }
 
-
+                t = t.Replace("{❕prefix}", packagePrefix);
                 t = t.Replace("{❕meta}", Util.GetInnerXML((XmlElement)meta.FirstChild));
                 //string metas = azw3.resc.metadata.OuterXml;
                 ((XmlElement)(azw3.resc.spine.FirstChild)).SetAttribute("toc", "ncxuks"); ;
@@ -603,9 +709,16 @@ namespace UnpackKindleS
             {
                 throw new UnpackKindleSException("no resc info!");
             }
-
-
         }
+
+        bool ContainsSVG(XmlDocument d)
+        {
+            var es = d.GetElementsByTagName("svg");
+            if (es.Count == 0) return false;
+            return true;
+        }
+
+
         string ImageName(int resid, Image_Section section)
         {
             return "embed" + Util.Number(resid) + section.ext;
@@ -651,6 +764,7 @@ namespace UnpackKindleS
             XmlDocument d = new XmlDocument();
             using (var rdr = new XmlTextReader(new StringReader(xhtml)))
             {
+                d.PreserveWhitespace = true;
                 rdr.DtdProcessing = DtdProcessing.Parse;
                 rdr.XmlResolver = new XhtmlEntityResolver();
                 d.Load(rdr);

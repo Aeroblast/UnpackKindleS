@@ -290,7 +290,7 @@ namespace UnpackKindleS
                             break;
                         }
                         index_info_table.Add(item);
-                        Console.WriteLine($"{item.name} {item.fid} {item.off} {item.title}");
+                        //Console.WriteLine($"{item.name} {item.fid} {item.off} {item.title}");
                     }
                 }
             }
