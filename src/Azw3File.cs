@@ -266,9 +266,22 @@ namespace UnpackKindleS
                             item.level = a[3];
                             if (item.level > 0)
                             {
-                                item.parent = a[4];
-                                item.fid = a[5];
-                                item.off = a[6];
+                                switch (a.Count)
+                                {
+                                    case 7:
+                                        item.parent = a[4];
+                                        item.fid = a[5];
+                                        item.off = a[6];
+                                        break;
+                                    case 9:
+                                        item.parent = a[4];
+                                        item.children_start = a[5];
+                                        item.children_end = a[6];
+                                        item.fid = a[7];
+                                        item.off = a[8];
+                                        break;
+                                }
+
                             }
                             else
                             {
@@ -290,7 +303,7 @@ namespace UnpackKindleS
                             break;
                         }
                         index_info_table.Add(item);
-                        //Console.WriteLine($"{item.name} {item.fid} {item.off} {item.title}");
+                        //Console.WriteLine($"name={item.name} fid={item.fid} off={item.off} parent={item.parent} {item.title}");
                     }
                 }
             }
