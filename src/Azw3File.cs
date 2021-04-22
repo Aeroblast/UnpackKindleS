@@ -291,6 +291,10 @@ namespace UnpackKindleS
                                         item.fid = a[4];
                                         item.off = a[5];
                                         break;
+                                    case 7:
+                                        item.fid = a[5];
+                                        item.off = a[6];
+                                        break;
                                     case 8:
                                         item.children_start = a[4];
                                         item.children_end = a[5];
