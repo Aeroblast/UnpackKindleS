@@ -60,6 +60,7 @@ namespace UnpackKindleS
                 xhtmls.Add(doc);
                 ProcNodes(doc.DocumentElement);
             }
+            SetCover();
             try
             {
                 CreateIndexDoc();
@@ -69,7 +70,6 @@ namespace UnpackKindleS
                 Log.log("[Error]Cannot Create NCX or NAV.");
                 Log.log("[Error]" + e.ToString());
             }
-            SetCover();
             CreateOPF();
             {
                 UInt64 thumb_offset = 0;
@@ -257,16 +257,17 @@ namespace UnpackKindleS
 
             attr.Value = KindlePosToUri(fid, off);
         }
-        string KindlePosToUri(int fid, int off)//务必在插入封面前调用
+        string KindlePosToUri(int fid, int off)
         {
+            int extraCoverOffset = extraCoverDocAdded ? 1 : 0;
             Regex reg_html_id = new Regex("^<.*? id=\"(.*?)\".*?>");
             Fragment_item frag = azw3.frag_table[fid];
             byte[] t = Util.SubArray(azw3.rawML, frag.pos_in_raw + off, frag.length - off);
             string s = Encoding.UTF8.GetString(t);
             Match m = reg_html_id.Match(s);
             if (m.Success)
-                return xhtml_names[frag.xhtml] + "#" + m.Groups[1].Value;
-            else return xhtml_names[frag.xhtml];
+                return xhtml_names[frag.xhtml + extraCoverOffset] + "#" + m.Groups[1].Value;
+            else return xhtml_names[frag.xhtml + extraCoverOffset];
         }
         void ProcEmbed(XmlAttribute attr)
         {
@@ -388,7 +389,8 @@ namespace UnpackKindleS
                     {
                         try
                         {
-                            guide += string.Format("    <li><a epub:type=\"{2}\" href=\"{1}\">{0}</a></li>\n", g.ref_name, Path.Combine("Text/", xhtml_names[azw3.frag_table[g.num].file_num + 1]), g.ref_type);
+                            int i = azw3.frag_table[g.num].file_num + 1;
+                            guide += string.Format("    <li><a epub:type=\"{2}\" href=\"{1}\">{0}</a></li>\n", g.ref_name, Path.Combine("Text/", xhtml_names[i]), g.ref_type);
                         }
                         catch (Exception e)
                         {
@@ -412,6 +414,7 @@ namespace UnpackKindleS
                 ncx = t;
             }
         }
+        bool extraCoverDocAdded = false;
         void SetCover()//等KindlePosToUri不再使用后 关系到xhtml相关变量
         {
             if (azw3.mobi_header.extMeta.id_value.ContainsKey(201))
@@ -441,6 +444,7 @@ namespace UnpackKindleS
                             XmlDocument cover_ = new XmlDocument();
                             cover_.LoadXml(cover);
                             xhtmls.Insert(0, cover_);
+                            extraCoverDocAdded = true;
                         }
 
                     }
