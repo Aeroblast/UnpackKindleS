@@ -16,8 +16,7 @@
 <h1>Guide</h1>
 <ol>
 	<li><a epub:type="cover" href="{❕cover}">Cover</a></li>
-{❕guide}
-</ol>
+{❕guide}</ol>
 </nav>
 </body>
 </html>
