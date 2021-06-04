@@ -70,6 +70,19 @@ namespace UnpackKindleS
                 Log.log("[Error]Cannot Create NCX or NAV.");
                 Log.log("[Error]" + e.ToString());
             }
+
+            foreach (var a in azw3.sections)
+            {
+
+                if (a.type == "Image" && string.IsNullOrEmpty(a.comment))
+                {
+                    int i = (int)Array.IndexOf(azw3.sections, a) - (int)azw3.mobi_header.first_res_index;
+                    string name = AddImage(i, "Not referred");
+                    Log.log($"[Warn] {name} is not referred.");
+                }
+
+            }
+
             CreateOPF();
             {
                 UInt64 thumb_offset = 0;
@@ -153,10 +166,18 @@ namespace UnpackKindleS
                         {
                             case "pos:": ProcLink(attr); break;
                             case "flow": ProcTextRef(attr); break;
-                            case "embe": ProcEmbed(attr); break;
+                            case "embe": attr.Value = ProcEmbed(attr.Value); break;
                         }
                     }
+                    if (attr.Name == "style")
+                    {
+                        attr.Value = ProcCSS(attr.Value);
+                    }
                 }
+            }
+            if (node.NodeType == XmlNodeType.Element && node.Name == "style")
+            {
+                node.InnerXml = ProcCSS(node.InnerXml);
             }
 
             if (node.ChildNodes != null)
@@ -269,15 +290,44 @@ namespace UnpackKindleS
                 return xhtml_names[frag.xhtml + extraCoverOffset] + "#" + m.Groups[1].Value;
             else return xhtml_names[frag.xhtml + extraCoverOffset];
         }
-        void ProcEmbed(XmlAttribute attr)
+        string ProcEmbed(string uri)
         {
-            Regex reg_link = new Regex("kindle:embed:([0-9|A-V]+)\\?mime=image/(.*)");
-            Match m = reg_link.Match(attr.Value);
-            if (!m.Success) { Log.log("[Error]link unsolved"); return; }
+            string link;
+            Regex reg_path = new Regex("kindle:embed:([0-9|A-V]+)");
+            Regex reg_query = new Regex("mime=(.*)/(.*)");
+            Match m = reg_path.Match(uri);
+            if (!m.Success) { Log.log("[Error]link unsolved: " + uri); return ""; }
             int resid = (int)Util.DecodeBase32(m.Groups[1].Value) - 1;
-            string name = AddImage(resid);
-            attr.Value = "../Images/" + name;
+            if (uri.IndexOf('?') > 1)
+            {
+                m = reg_query.Match(uri);
+                if (m.Groups[1].Value == "image")
+                {
+                    string name = AddImage(resid);
+                    link = "../Images/" + name;
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                Section section = azw3.sections[azw3.mobi_header.first_res_index + resid];
+                switch (section.type)
+                {
+                    case "FONT":
+                        {
+                            link = "../Fonts/embed" + Util.Number(resid) + ".otf";
+                            //to-do:dump fonts.
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException();
 
+                }
+            }
+            return link;
         }
 
         //Process CSS file: Resolve links in css file
@@ -285,7 +335,7 @@ namespace UnpackKindleS
         {
             string r = text;
             Regex reg_link = new Regex("url\\(kindle:flow:([0-9|A-V]+)\\?mime=text/css\\)");
-            Regex reg_link2 = new Regex("url\\(kindle:embed:([0-9|A-V]+)\\)");
+            Regex reg_link2 = new Regex("url\\((kindle:embed:.+?)\\)");
             foreach (Match m in reg_link.Matches(text))
             {
                 int flowid = (int)Util.DecodeBase32(m.Groups[1].Value);
@@ -302,11 +352,7 @@ namespace UnpackKindleS
             }
             foreach (Match m in reg_link2.Matches(text))
             {
-                int section_offset = (int)Util.DecodeBase32(m.Groups[1].Value);
-
-                //to do: font 
-                string name = "embed" + Util.Number(section_offset) + ".otf";
-                r = r.Replace(m.Groups[0].Value, "url(" + name + ")");
+                r = r.Replace(m.Groups[1].Value, ProcEmbed(m.Groups[1].Value));
             }
             return r;
         }
@@ -424,7 +470,7 @@ namespace UnpackKindleS
                 if (azw3.mobi_header.first_res_index + off < azw3.section_count)
                     if (azw3.sections[azw3.mobi_header.first_res_index + off].type == "Image")
                     {
-                        cover_name = AddImage(off);
+                        cover_name = AddImage(off, "Cover");
 
                         if (NeedCreateCoverDocument())
                         {
@@ -689,8 +735,6 @@ namespace UnpackKindleS
                     }
                 }
 
-
-
                 {
                     string metaTemplate = "<meta name=\"{0}\" content=\"{1}\" />\n";
                     string tempstr = "";
@@ -731,9 +775,10 @@ namespace UnpackKindleS
         {
             return "embed" + Util.Number(resid) + "_HD" + section.ext;
         }
-        string AddImage(int id)
+        string AddImage(int id, string message = "")
         {
             string name = null; byte[] data = null;
+            Section toComment = null;
             if (azw6 != null)
             {
                 int r = azw6.image_sections.Find(s => s == (id + 1));
@@ -743,7 +788,7 @@ namespace UnpackKindleS
                     name = ImageNameHD(id, sec);
                     data = sec.img;
                     sec.comment = name;
-                    azw3.sections[azw3.mobi_header.first_res_index + id].comment = name + " (HD version in azw6)";
+                    toComment = azw3.sections[azw3.mobi_header.first_res_index + id];
 
                 }
             }
@@ -752,12 +797,13 @@ namespace UnpackKindleS
                 Image_Section section = (Image_Section)azw3.sections[azw3.mobi_header.first_res_index + id];
                 name = ImageName(id, section);
                 data = section.raw;
-                section.comment = name;
+                toComment = section;
             }
 
             if (img_names.Find(s => s == name) != null) return name;
             imgs.Add(data);
             img_names.Add(name);
+            toComment.comment = name + " | " + message;
             return name;
         }
         const string xhtml11doctype = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n";
