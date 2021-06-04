@@ -8,4 +8,4 @@ Another part has an azw.res extension and it is not encrypted. The azw.res file 
 
 The total file size of the two parts will be the File Size in the Product details.
 
-Please note that such file could only be found with Kindle for PC 1.19 or later. Eariler versions have no azw.res files. When the FAQ was written, the latest version is 1.28 and it can be processed with latest UnpackKindleU.
+Please note that azw.res could only be found with Kindle for PC 1.19 or later. Eariler versions have only azw (it is azw3 after decrypting). After Kindle for PC 1.30, the key is not able to dump currently (following DeDRM_tools). But if you have dumped the key before, you can use it. For convenience, just use Kindle for PC between 1.19~1.29.
