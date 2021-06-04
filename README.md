@@ -1,5 +1,5 @@
 # UnpackKindleS
-将 XXX_nodrm.azw3(通过DeDRM工具生成) 和 azw.res(Kindle for PC 1.19 or later) 合并为 epub。推荐使用Kindle for PC 1.19~1.28之间的版本。
+将 XXX_nodrm.azw3(通过DeDRM工具生成) 和 azw.res(Kindle for PC 1.19 or later) 合并为 epub。推荐使用Kindle for PC 1.19~1.29之间的版本。
 
 ## 使用场景
 当你需要将azw.res里的高清资源和azw3合并输出到epub中时。也可以单独转换azw3或解体azw.res。这个项目没有支持其他情况。经过配置dedrm.bat可以调用DeDRM程序，达到一键批量转换的效果。
@@ -50,7 +50,7 @@ Release版中，另外包含一个 [精简版的DeDRM](https://github.com/Aerobl
 
 ### 使用开发版
 
-安装dotnet core，请使用源码中的bat，其他同上。
+安装dotnet 5，请使用源码中的bat，其他同上。
 
 
 ## 其他说明
