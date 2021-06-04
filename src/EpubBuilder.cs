@@ -756,7 +756,7 @@ namespace UnpackKindleS
                 {
                     XmlElement x = meta.CreateElement("meta");
                     x.SetAttribute("name", "ibooks:specified-fonts");
-                    x.InnerText = "true";
+                    x.SetAttribute("content", "true");
                     meta.FirstChild.AppendChild(x);
                 }
 
