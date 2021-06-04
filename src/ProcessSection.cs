@@ -3,6 +3,8 @@ using System.Xml;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 
 namespace UnpackKindleS
 {
@@ -23,7 +25,7 @@ namespace UnpackKindleS
             {
                 case "??\r\n": type = "End Of File"; break;
                 case "?6?\t": type = "Place Holder"; break;
-                case "\0\0\0\0":type="Empty Section0";break;
+                case "\0\0\0\0": type = "Empty Section0"; break;
             }
         }
         public Section(Section s) { type = s.type; raw = s.raw; }
@@ -279,6 +281,54 @@ namespace UnpackKindleS
                 consumed++;
                 if ((x & 0x80) > 0) finish = true;
                 value = (value << 7) | (x & 0x7f);
+            }
+        }
+    }
+    class Font_Section : Section
+    {
+        public uint original_length, flags, font_data_start, xor_length, xor_start;
+        const uint ZLIB = 0x1, XOR = 0x2;
+        public byte[] data;
+        public string ext;
+        public Font_Section(Section section) : base(section)
+        {
+            original_length = Util.GetUInt32(raw, 0x04);
+            flags = Util.GetUInt32(raw, 0x08);
+            font_data_start = Util.GetUInt32(raw, 0x0C);
+            xor_length = Util.GetUInt32(raw, 0x10);
+            xor_start = Util.GetUInt32(raw, 0x14);
+            data = Util.SubArray(raw, font_data_start, (uint)raw.Length - font_data_start);
+            if ((XOR & flags) > 0)
+            {
+                //http://idpf.org/epub/20/spec/FontManglingSpec.html
+                byte[] key = Util.SubArray(raw, xor_start, xor_length);
+                for (int i = 0; i < 1040 && i < data.Length; i++)
+                {
+                    data[i] ^= key[i % key.Length];
+                }
+
+            }
+            if ((ZLIB & flags) > 0)
+            {
+
+                using (var ms = new MemoryStream(data, 2, data.Length - 2))//Microsoft's DeflateStream class in System.Io.Compression doesn't understand the first two bytes.
+                using (var zs = new DeflateStream(ms, CompressionMode.Decompress))
+                {
+                    byte[] temp = new byte[original_length];
+                    zs.Read(temp, 0, (int)original_length);
+                    data = temp;
+                }
+            }
+            string header = Encoding.ASCII.GetString(data, 0, 4);
+            switch (header)
+            {
+                case "OTTO":
+                    ext = ".otf"; break;
+                case "ttcf":
+                case "true":
+                case "\0\x1\0\0":
+                    ext = ".ttf"; break;
+                default: throw new Exception("Error at dump font.");
             }
         }
     }

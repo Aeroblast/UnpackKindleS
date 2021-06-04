@@ -23,6 +23,8 @@ namespace UnpackKindleS
         List<string> css_names = new List<string>();
         List<byte[]> imgs = new List<byte[]>();
         List<string> img_names = new List<string>();
+        List<string> font_names = new List<string>();
+        List<byte[]> fonts = new List<byte[]>();
 
 
         string cover_name;
@@ -70,6 +72,11 @@ namespace UnpackKindleS
                 Log.log("[Error]Cannot Create NCX or NAV.");
                 Log.log("[Error]" + e.ToString());
             }
+            UInt64 thumb_offset = 0;
+            if (azw3.mobi_header.extMeta.id_value.TryGetValue(202, out thumb_offset))
+            {
+                azw3.sections[azw3.mobi_header.first_res_index + thumb_offset].comment = "Thumb Cover, Ignored";
+            }
 
             foreach (var a in azw3.sections)
             {
@@ -84,13 +91,6 @@ namespace UnpackKindleS
             }
 
             CreateOPF();
-            {
-                UInt64 thumb_offset = 0;
-                if (azw3.mobi_header.extMeta.id_value.TryGetValue(202, out thumb_offset))
-                {
-                    azw3.sections[azw3.mobi_header.first_res_index + thumb_offset].comment = "Thumb Cover, Ignored";
-                }
-            }
 
         }
         const string container = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">    <rootfiles><rootfile full-path=\"OEBPS/content.opf\" media-type=\"application/oebps-package+xml\"/>    </rootfiles></container>";
@@ -128,6 +128,10 @@ namespace UnpackKindleS
                 for (int i = 0; i < img_names.Count; i++)
                 {
                     ZipWriteAllBytes(zip, "OEBPS/Images/" + img_names[i], imgs[i]);
+                }
+                for (int i = 0; i < font_names.Count; i++)
+                {
+                    ZipWriteAllBytes(zip, "OEBPS/Fonts/" + font_names[i], fonts[i]);
                 }
                 ZipWriteAllText(zip, "OEBPS/toc.ncx", ncx);
                 ZipWriteAllText(zip, "OEBPS/nav.xhtml", nav);
@@ -264,8 +268,6 @@ namespace UnpackKindleS
                     break;
             }
 
-
-
         }
         void ProcLink(XmlAttribute attr)
         {
@@ -318,8 +320,12 @@ namespace UnpackKindleS
                 {
                     case "FONT":
                         {
-                            link = "../Fonts/embed" + Util.Number(resid) + ".otf";
-                            //to-do:dump fonts.
+                            Font_Section font_Section = (Font_Section)section;
+                            string name = "embed" + Util.Number(resid) + font_Section.ext;
+                            link = "../Fonts/" + name;
+                            font_Section.comment = name;
+                            fonts.Add(font_Section.data);
+                            font_names.Add(name);
                         }
                         break;
                     default:
@@ -514,7 +520,6 @@ namespace UnpackKindleS
                 XmlDocument manifest = new XmlDocument();
                 XmlElement mani_root = manifest.CreateElement("manifest");
                 manifest.AppendChild(mani_root);
-                string packagePrefix = "";
 
                 int i = 0;
 
@@ -578,6 +583,20 @@ namespace UnpackKindleS
                     item.SetAttribute("href", "Styles/" + cssname);
                     item.SetAttribute("id", Path.GetFileNameWithoutExtension(cssname));
                     item.SetAttribute("media-type", "text/css");
+                    mani_root.AppendChild(item);
+                }
+                foreach (string fontname in font_names)
+                {
+                    XmlElement item = manifest.CreateElement("item");
+                    item.SetAttribute("href", "Fonts/" + fontname);
+                    item.SetAttribute("id", Path.GetFileNameWithoutExtension(fontname));
+                    string mediaType = "";
+                    switch (Path.GetExtension(fontname))
+                    {
+                        case ".ttf": mediaType = "application/font-sfnt"; break;
+                        case ".otf": mediaType = "application/font-sfnt"; break;
+                    }
+                    item.SetAttribute("media-type", mediaType);
                     mani_root.AppendChild(item);
                 }
                 {
@@ -693,7 +712,6 @@ namespace UnpackKindleS
                     string v = azw3.mobi_header.extMeta.id_string[122];
                     if (v == "true")
                     {
-                        packagePrefix = "\n prefix=\"rendition: http://www.idpf.org/vocab/rendition/#\"";
                         //<meta property="rendition:layout">pre-paginated</meta>
                         //<meta property="rendition:orientation">auto</meta>
                         //<meta property="rendition:spread">landscape</meta>
@@ -734,6 +752,13 @@ namespace UnpackKindleS
                         }
                     }
                 }
+                if (fonts.Count > 0)
+                {
+                    XmlElement x = meta.CreateElement("meta");
+                    x.SetAttribute("name", "ibooks:specified-fonts");
+                    x.InnerText = "true";
+                    meta.FirstChild.AppendChild(x);
+                }
 
                 {
                     string metaTemplate = "<meta name=\"{0}\" content=\"{1}\" />\n";
@@ -743,7 +768,6 @@ namespace UnpackKindleS
                     t = t.Replace("{❕othermeta}", tempstr);
                 }
 
-                t = t.Replace("{❕prefix}", packagePrefix);
                 t = t.Replace("{❕meta}", Util.GetInnerXML((XmlElement)meta.FirstChild));
                 //string metas = azw3.resc.metadata.OuterXml;
                 ((XmlElement)(azw3.resc.spine.FirstChild)).SetAttribute("toc", "ncxuks"); ;

@@ -127,6 +127,9 @@ namespace UnpackKindleS
                         sections[i] = new RESC_Section(sections[i]);
                         resc = (RESC_Section)sections[i];
                         break;
+                    case "FONT":
+                        sections[i] = new Font_Section(sections[i]);
+                        break;
                     default:
                         string r = Util.GuessImageType(sections[i].raw);
                         if (r != null)

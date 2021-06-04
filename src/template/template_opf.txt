@@ -2,7 +2,9 @@
 <package
  version="3.0"
  unique-identifier="ASIN"
- xmlns="http://www.idpf.org/2007/opf"{❕prefix}
+ xmlns="http://www.idpf.org/2007/opf"
+ prefix="rendition: http://www.idpf.org/vocab/rendition/#
+         ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/"
 >
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
 {❕meta}
