@@ -449,7 +449,8 @@ namespace UnpackKindleS
                     {
                         try
                         {
-                            int i = azw3.frag_table[g.num].file_num + 1;
+                            int offset = extraCoverDocAdded ? 1 : 0;
+                            int i = azw3.frag_table[g.num].file_num + offset;
                             guide += string.Format("    <li><a epub:type=\"{2}\" href=\"{1}\">{0}</a></li>\n", g.ref_name, Path.Combine("Text/", xhtml_names[i]), g.ref_type);
                         }
                         catch (Exception e)
