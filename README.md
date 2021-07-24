@@ -2,7 +2,7 @@
 将 XXX_nodrm.azw3(通过DeDRM工具生成) 和 azw.res(Kindle for PC 1.19 or later) 合并为 epub。推荐使用Kindle for PC 1.19~1.29之间的版本。
 
 ## 使用场景
-当你需要将azw.res里的高清资源和azw3合并输出到epub中时。也可以单独转换azw3或解体azw.res。这个项目没有支持其他情况。经过配置dedrm.bat可以调用DeDRM程序，达到一键批量转换的效果。
+当你需要将azw.res里的高清资源和azw3合并输出到epub中时。也可以单独转换azw3或解体azw.res。DeDRM部分通过调用外部程序实现，Release中将包含[精简版的DeDRM](https://github.com/Aeroblast/AZW3_PC_DeDRM)，可以开箱即用。
 
 ## 使用方法
 
@@ -15,8 +15,6 @@ Release版可执行文件为Windows 64bit，不需要安装任何依赖。[【�
 #### 简单的使用方法
 
 下载Release版，将包含命令行程序UnpackKindleS.exe及相关的Windows批处理脚本。
-
-Release版中，另外包含一个 [精简版的DeDRM](https://github.com/Aeroblast/AZW3_PC_DeDRM)，因此不需要额外的工具。
 
 最简流程：1.在Kindle for PC中下载所有需要导出的书籍；2.运行`_Tool_Proc_MyKindleContent.bat`，将会在同目录下输出EPUB。
 
@@ -42,7 +40,13 @@ Release版中，另外包含一个 [精简版的DeDRM](https://github.com/Aerobl
 
 `` -batch `` 检测文件夹中含有EBOK的文件夹并处理。用于处理My Kindle Content。
 
-`` --just-dump-res `` 提取高清插图。
+`` --just-dump-res `` 仅提取高清插图。
+
+`` --rename-xhtml-with-id`` 尝试使用id命名xhtml文件。对于大手出版社的书，通常可以获得有意义的文件名。对于使用SVG链接的目录，可以让链接重新在支持的阅读系统中生效。
+
+``--rename-when-exist`` 输出文件已经存在时，自动重命名。
+
+``--overwrite`` 输出文件已经存在时，自动覆盖。
 
 可以参考提供的bat。
 
@@ -50,7 +54,7 @@ Release版中，另外包含一个 [精简版的DeDRM](https://github.com/Aerobl
 
 ### 使用开发版
 
-安装dotnet 5，请使用源码中的bat，其他同上。
+安装dotnet 5，请使用源码中的bat，自行配置dedrm.bat，其他同上。
 
 
 ## 其他说明
