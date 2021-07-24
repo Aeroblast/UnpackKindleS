@@ -48,7 +48,8 @@ namespace UnpackKindleS
                 {
                     i = 1; offset = -1;
                 }
-                var itemrefs = azw3.resc.spine.FirstChild.ChildNodes;
+                // var itemrefs = azw3.resc.spine.FirstChild.ChildNodes;
+                var itemrefs = azw3.resc.spine.GetElementsByTagName("itemref");
                 for (; (i + offset < xhtml_names.Count) && (i < itemrefs.Count); i++)
                 {
                     var id = itemrefs[i].Attributes.GetNamedItem("idref").Value;
@@ -63,6 +64,10 @@ namespace UnpackKindleS
                 ProcNodes(doc.DocumentElement);
             }
             SetCover();
+
+#if DEBUG
+            CreateIndexDoc();
+#else
             try
             {
                 CreateIndexDoc();
@@ -72,6 +77,8 @@ namespace UnpackKindleS
                 Log.log("[Error]Cannot Create NCX or NAV.");
                 Log.log("[Error]" + e.ToString());
             }
+#endif
+
             UInt64 thumb_offset = 0;
             if (azw3.mobi_header.extMeta.id_value.TryGetValue(202, out thumb_offset))
             {
@@ -94,9 +101,9 @@ namespace UnpackKindleS
 
         }
         const string container = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">    <rootfiles><rootfile full-path=\"OEBPS/content.opf\" media-type=\"application/oebps-package+xml\"/>    </rootfiles></container>";
-        public void Save(string dir)
+        public void Save(string path)
         {
-            using (FileStream fs = new FileStream(dir, FileMode.Create))
+            using (FileStream fs = new FileStream(path, FileMode.Create))
             using (ZipArchive zip = new ZipArchive(fs, ZipArchiveMode.Create))
             {
                 {
@@ -137,6 +144,7 @@ namespace UnpackKindleS
                 ZipWriteAllText(zip, "OEBPS/nav.xhtml", nav);
                 ZipWriteAllText(zip, "OEBPS/content.opf", opf);
             }
+            Log.log("Saved: " + path);
         }
         void ZipWriteAllText(ZipArchive zip, string path, string text)
         {
@@ -489,7 +497,7 @@ namespace UnpackKindleS
                             string coverDocumentName = "cover.xhtml";
                             if (renameXhtmlWithId)
                             {
-                                var id = azw3.resc.spine.FirstChild.ChildNodes[0].Attributes.GetNamedItem("idref").Value;
+                                var id = azw3.resc.spine.GetElementsByTagName("itemref")[0].Attributes.GetNamedItem("idref").Value;
                                 coverDocumentName = id + ".xhtml";
                             }
                             xhtml_names.Insert(0, coverDocumentName);
@@ -508,7 +516,7 @@ namespace UnpackKindleS
 
         bool NeedCreateCoverDocument()
         {
-            if (azw3.resc.spine.FirstChild.ChildNodes.Count == xhtml_names.Count) return false;
+            if (azw3.resc.spine.GetElementsByTagName("itemref").Count == xhtml_names.Count) return false;
             return true;
         }
 

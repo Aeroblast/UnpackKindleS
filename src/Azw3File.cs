@@ -283,6 +283,12 @@ namespace UnpackKindleS
                                         item.fid = a[7];
                                         item.off = a[8];
                                         break;
+                                    case 8:
+                                        item.parent = a[5];
+                                        item.fid = a[6];
+                                        item.off = a[7];
+                                        break;
+                                    default: throw new Exception("Unhandled Error at INDX");
                                 }
 
                             }
@@ -303,6 +309,13 @@ namespace UnpackKindleS
                                         item.children_end = a[5];
                                         item.fid = a[6];
                                         item.off = a[7];
+                                        break;
+                                    case 9:
+   
+                                        item.children_start = a[5];
+                                        item.children_end = a[6];
+                                        item.fid = a[7];
+                                        item.off = a[8];
                                         break;
                                     default: throw new Exception("Unhandled Error at INDX");
                                 }
