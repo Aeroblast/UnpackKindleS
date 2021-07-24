@@ -1,4 +1,4 @@
 namespace UnpackKindleS
 {
-    public class Version{public static string version="20210604";}
+    public class Version{public static string version="20210724";}
 }
