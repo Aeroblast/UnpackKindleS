@@ -206,6 +206,12 @@ namespace UnpackKindleS
             { Log.log("[Error]link unsolved"); return; }
             int flowid = (int)Util.DecodeBase32(m.Groups[1].Value);
             string mime = m.Groups[2].Value;
+            if (flowid < 0)
+            {
+                attr.Value = "flow" + (10000 + flowid);
+                Log.log("[Warn]placeholder link: " + m.Value);
+                return;
+            }
             switch (mime)
             {
                 case "css":
