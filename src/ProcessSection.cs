@@ -328,7 +328,10 @@ namespace UnpackKindleS
                 case "true":
                 case "\0\x1\0\0":
                     ext = ".ttf"; break;
-                default: throw new Exception("Error at dump font.");
+                default:
+                    ext = null;
+                    Log.log($"[Warn] unknown font header: 0x{data[0]:X}{data[1]:X}{data[2]:X}{data[3]:X}");
+                    break;
             }
         }
     }

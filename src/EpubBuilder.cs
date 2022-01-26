@@ -336,6 +336,10 @@ namespace UnpackKindleS
                         {
                             Font_Section font_Section = (Font_Section)section;
                             string name = "embed" + Util.Number(resid) + font_Section.ext;
+                            if (font_Section.ext == null)
+                            {
+                                Log.log("[Warn] The referred font file is unrecognized: "+name);
+                            }
                             link = "../Fonts/" + name;
                             font_Section.comment = name;
                             fonts.Add(font_Section.data);
