@@ -75,10 +75,10 @@ namespace UnpackKindleS
             if (!end_of_proc) ProcPath(args);
             if (append_log)
             {
-                Log.Append("..\\lastrun.log");
+                Log.Append(Path.Combine(Environment.CurrentDirectory, "..", "lastrun.log"));
             }
             else
-                Log.Save("..\\lastrun.log");
+                Log.Save(Path.Combine(Environment.CurrentDirectory, "..", "lastrun.log"));
 
             Environment.CurrentDirectory = temp_environment_dir;
         }
