@@ -14,6 +14,7 @@ namespace UnpackKindleS
         static bool append_log = false;
         static bool overwrite = false;
         static bool rename_when_exist = false;
+        static bool ignore_when_exist = false;
         static bool rename_xhtml_with_id = false;
         static void Main(string[] args)
         {
@@ -54,6 +55,10 @@ namespace UnpackKindleS
                 {
                     rename_when_exist = true;
                 }
+                if (a.ToLower() == "--ignore-when-exist")
+                {
+                    ignore_when_exist = true;
+                }
                 if (a.ToLower() == "--rename-xhtml-with-id")
                 {
                     rename_xhtml_with_id = true;
@@ -70,10 +75,10 @@ namespace UnpackKindleS
             if (!end_of_proc) ProcPath(args);
             if (append_log)
             {
-                Log.Append("..\\lastrun.log");
+                Log.Append(Path.Combine(Environment.CurrentDirectory, "..", "lastrun.log"));
             }
             else
-                Log.Save("..\\lastrun.log");
+                Log.Save(Path.Combine(Environment.CurrentDirectory, "..", "lastrun.log"));
 
             Environment.CurrentDirectory = temp_environment_dir;
         }
@@ -228,6 +233,11 @@ namespace UnpackKindleS
                         }
                         Log.log("[Warn]Save as...");
                     }
+                    else if (ignore_when_exist)
+                    {
+                        Log.log("[Warn]Output ignored.");
+                        output_path = "";
+                    }
                     else if (!overwrite)
                     {
                         Console.WriteLine("Output file already exist. N(Abort,Defualt)/y(Overwrite)/r(Rename)?");
@@ -256,7 +266,7 @@ namespace UnpackKindleS
                         }
                         else
                         {
-                            Log.log("[Error]Operation aborted. You can use --overwrite or --rename-when-exist to avoid pause.");
+                            Log.log("[Error]Operation aborted. You can use --overwrite or --rename-when-exist or --ignore-when-exist to avoid pause.");
                             output_path = "";
                         }
 

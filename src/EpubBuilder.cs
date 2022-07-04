@@ -116,7 +116,7 @@ namespace UnpackKindleS
                 {
                     string p = "OEBPS/Text/" + xhtml_names[i];
                     string ss;
-                    var xmlSettings = new XmlWriterSettings { Indent = true, NewLineChars = "\n" };
+                    var xmlSettings = new XmlWriterSettings { Indent = true, NewLineChars = "\n", CheckCharacters = false };
                     using (var stringWriter = new StringWriter())
                     using (var xmlTextWriter = XmlWriter.Create(stringWriter, xmlSettings))
                     {
@@ -338,7 +338,7 @@ namespace UnpackKindleS
                             string name = "embed" + Util.Number(resid) + font_Section.ext;
                             if (font_Section.ext == null)
                             {
-                                Log.log("[Warn] The referred font file is unrecognized: "+name);
+                                Log.log("[Warn] The referred font file is unrecognized: " + name);
                             }
                             link = "../Fonts/" + name;
                             font_Section.comment = name;
@@ -451,7 +451,7 @@ namespace UnpackKindleS
             CreateIndexDoc_Helper(root, temp_epub3, temp_epub2);
             //Create NAV
             {
-                string t = File.ReadAllText("template\\template_nav.txt");
+                string t = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "template", "template_nav.txt"));
                 t = t.Replace("{❕toc}", temp_epub3.ToString());
                 string guide = "";
                 if (azw3.guide_table != null)
@@ -475,7 +475,7 @@ namespace UnpackKindleS
                 nav = t;
             }
             {
-                string t = File.ReadAllText("template\\template_ncx.txt");
+                string t = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "template", "template_ncx.txt"));
 
                 t = t.Replace("{❕navMap}", temp_epub2.ToString());
                 t = t.Replace("{❕Title}", azw3.title);
@@ -501,7 +501,7 @@ namespace UnpackKindleS
                         {
                             Log.log("[Info]Adding a cover document.");
 
-                            string t = File.ReadAllText("template\\template_cover.txt");
+                            string t = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "template", "template_cover.txt"));
                             var (w, h) = Util.GetImageSize(imgs[img_names.IndexOf(cover_name)]);
                             cover = t.Replace("{❕image}", cover_name).Replace("{❕w}", w.ToString()).Replace("{❕h}", h.ToString());
 
@@ -535,7 +535,7 @@ namespace UnpackKindleS
         {
             if (azw3.resc != null)
             {
-                string t = File.ReadAllText("template\\template_opf.txt");
+                string t = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "template", "template_opf.txt"));
                 XmlDocument manifest = new XmlDocument();
                 XmlElement mani_root = manifest.CreateElement("manifest");
                 manifest.AppendChild(mani_root);
@@ -854,8 +854,10 @@ namespace UnpackKindleS
         {
             int htmlstart = xhtml.IndexOf("<html", 0, StringComparison.OrdinalIgnoreCase);
             xhtml = xhtml11doctype + xhtml.Substring(htmlstart);
+            string filt_xhtml = Util.EscapeInvalidXmlCharacters(xhtml);
+            if (filt_xhtml != xhtml) Log.log("[Warn] Invalid character found in xhtml, escaped.");
             XmlDocument d = new XmlDocument();
-            using (var rdr = new XmlTextReader(new StringReader(xhtml)))
+            using (var rdr = new XmlTextReader(new StringReader(filt_xhtml)))
             {
                 d.PreserveWhitespace = true;
                 rdr.DtdProcessing = DtdProcessing.Parse;
