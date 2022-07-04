@@ -116,7 +116,7 @@ namespace UnpackKindleS
                 {
                     string p = "OEBPS/Text/" + xhtml_names[i];
                     string ss;
-                    var xmlSettings = new XmlWriterSettings { Indent = true, NewLineChars = "\n" };
+                    var xmlSettings = new XmlWriterSettings { Indent = true, NewLineChars = "\n", CheckCharacters = false };
                     using (var stringWriter = new StringWriter())
                     using (var xmlTextWriter = XmlWriter.Create(stringWriter, xmlSettings))
                     {
@@ -854,8 +854,10 @@ namespace UnpackKindleS
         {
             int htmlstart = xhtml.IndexOf("<html", 0, StringComparison.OrdinalIgnoreCase);
             xhtml = xhtml11doctype + xhtml.Substring(htmlstart);
+            string filt_xhtml = Util.EscapeInvalidXmlCharacters(xhtml);
+            if (filt_xhtml != xhtml) Log.log("[Warn] Invalid character found in xhtml, escaped.");
             XmlDocument d = new XmlDocument();
-            using (var rdr = new XmlTextReader(new StringReader(xhtml)))
+            using (var rdr = new XmlTextReader(new StringReader(filt_xhtml)))
             {
                 d.PreserveWhitespace = true;
                 rdr.DtdProcessing = DtdProcessing.Parse;

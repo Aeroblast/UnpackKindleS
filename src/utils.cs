@@ -172,6 +172,35 @@ namespace UnpackKindleS
             ;
         }
 
+        public static string EscapeInvalidXmlCharacters(string in_string)
+        {
+            // from https://stackoverflow.com/a/641632
+            if (in_string == null) return null;
+
+            StringBuilder str_buf = new StringBuilder();
+            char ch;
+
+            for (int i = 0; i < in_string.Length; i++)
+            {
+                ch = in_string[i];
+                if ((ch >= 0x0020 && ch <= 0xD7FF) ||
+                    (ch >= 0xE000 && ch <= 0xFFFD) ||
+                    ch == 0x0009 ||
+                    ch == 0x000A ||
+                    ch == 0x000D)
+                {
+                    str_buf.Append(ch);
+                }
+                else
+                {
+                    byte[] bytes = Encoding.UTF8.GetBytes(Char.ToString(ch));
+
+                    str_buf.Append("&#x" + Convert.ToHexString(bytes) + ";");
+                }
+            }
+            return str_buf.ToString();
+        }
+
         public static (int, int) GetImageSize(byte[] data)
         {
             using (var img = Image.FromStream(new MemoryStream(data)))
